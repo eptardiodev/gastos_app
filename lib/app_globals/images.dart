@@ -1,4 +1,4 @@
 class AppImage {
 
-  final String logo = "res/images/logo.png";
+  // final String logo = "res/images/logo.png";
 }
