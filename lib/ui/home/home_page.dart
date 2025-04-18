@@ -15,45 +15,42 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
 
-    int count = 0;
 
   @override
   Widget buildWidget(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: R.color.primaryColor,
-        onPressed: () {
-          setState(() {
-            count += 1;
-          });
-        },
-        child: Container(
-          padding: const EdgeInsets.all(5),
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white,
-          ),
-          child: Icon(
-            Icons.add,
-            color: R.color.primaryColor,
-          ),
-        ),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   backgroundColor: R.color.primaryColor,
+      //   onPressed: () {},
+      //   child: Container(
+      //     padding: const EdgeInsets.all(5),
+      //     decoration: const BoxDecoration(
+      //       shape: BoxShape.circle,
+      //       color: Colors.white,
+      //     ),
+      //     child: Icon(
+      //       Icons.add,
+      //       color: R.color.primaryColor,
+      //     ),
+      //   ),
+      // ),
       body: Center(
         child: Column(
-          children: [
-            Text(
-              count.toString()),
-            Text(R.string.hello)
-          ],
+          children: [],
         )
       ),
       appBar: AppBar(
+        automaticallyImplyLeading: true,
+        title: Text("Gastos",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold
+          ),),
+        centerTitle: true,
         backgroundColor: R.color.primaryColor,
-        leading: IconButton(
-          icon: const Icon(Icons.other_houses_outlined),
-          onPressed: () {  },
-        ),
+      ),
+      drawer: Drawer(
+
       ),
     );
   }
