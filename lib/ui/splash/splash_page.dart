@@ -54,8 +54,9 @@ class _SplashState extends StateWithBloC<SplashPage, SplashBloc> {
           child:
           // Text("Base App",
           //   style: TextStyle(fontSize: 60),),
-          Image.asset(R.image.logo,
-          ),
+          Icon(
+            Icons.monetization_on_outlined,
+          size: 160,),
         ),
       ),
     );
