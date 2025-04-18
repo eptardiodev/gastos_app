@@ -1,0 +1,20 @@
+{
+  "@@locale": "es",
+  "appName": "BaseApp",
+  "accept": "Aceptar",
+  "cancel": "Cancelar",
+  "contacts_employee": "Empleados",
+  "copiedToClipboard": "Copiado al portapapeles!",
+  "delete": "Eliminar",
+  "deleteAll": "Eliminar todo",
+  "enablePermission": "Habilitar permiso en Ajustes?",
+  "enterKeyManually": "Ingresar clave manualmente",
+  "fieldRequired": "Campo requerido",
+  "hello": "Hola",
+  "ok": "Ok",
+  "operationConfirmation": "Está seguro de esta operación?",
+  "permissionDenied": "Permiso denegado",
+  "qrScanner": "QR",
+  "no": "No",
+  "yes": "Si"
+}
