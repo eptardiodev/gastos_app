@@ -1,6 +1,7 @@
 import 'package:gastos_app/app_globals/R.dart';
 import 'package:gastos_app/base/bloc_state.dart';
 import 'package:gastos_app/base/navigation_utils.dart';
+import 'package:gastos_app/domain/user/user_model.dart';
 import 'package:gastos_app/ui/home/home_page.dart';
 import 'package:gastos_app/ui/splash/splash_bloc.dart';
 import 'package:gastos_app/ui/tx_widgets/tx_no_appbar_widget.dart';
@@ -8,7 +9,10 @@ import 'package:flutter/material.dart';
 
 
 class SplashPage extends StatefulWidget {
-  const SplashPage({super.key});
+
+  const SplashPage({
+    super.key,
+  });
 
   @override
   State<StatefulWidget> createState() => _SplashState();
@@ -22,30 +26,12 @@ class _SplashState extends StateWithBloC<SplashPage, SplashBloc> {
       const Duration(seconds: 2),
       () => NavigationUtils.pushReplacement(context, const HomePage())
     );
-    // bloc.profileStream.listen((data) {
-    //   if (data.firstLoggedOn == null) {
-    //     NavigationUtils.pushReplacement(context, const HomePage());
-    //   } else {
-    //     bloc.getLicense().then((license) {
-    //       if(license != null) {
-    //         NavigationUtils.pushReplacementWithRouteAndMaterial(
-    //             context,
-    //             const HomePage(),
-    //             NavigationUtils.homeRoute);
-    //       } else {
-    //         NavigationUtils.pushReplacement(context, LoginPage());
-    //       }
-    //     });
-    //   }
-    // });
-    // bloc.getProfile();
   }
 
   @override
   Widget buildWidget(BuildContext context) {
     // Future.delayed(const Duration(seconds: 4));
     // NavigationUtils.pushReplacement(context, const HomePage());
-
     return TXNoAppbarWidget(
       body: Container(
         height: double.infinity,

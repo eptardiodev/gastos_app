@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:gastos_app/domain/user/user_model.dart';
 import 'package:gastos_app/ui/home/home_page.dart';
 import 'package:gastos_app/ui/splash/splash_page.dart';
 import 'package:flutter/material.dart';
@@ -10,8 +11,14 @@ void main() {
   runZonedGuarded(() {
     WidgetsFlutterBinding.ensureInitialized();
     runApp(
-      const BaseApp(
-        initPage: SplashPage(),
+      BaseApp(
+        initPage: HomePage()
+        /// SplashPage implementation in the future
+        // SplashPage(
+        //   user: UserModel(
+        //     userId: "0001",
+        //   ),
+        // ),
       )
     );
   }, (error, stackTrace) async {

@@ -30,7 +30,7 @@ class TXTextWidget extends StatelessWidget {
       text,
       textAlign: textAlign,
       style: TextStyle(
-          color: color ?? R.color.grayDarkColor,
+          color: color ?? Colors.white,
           fontSize: size,
           fontWeight: fontWeight,
           fontStyle: fontStyle),

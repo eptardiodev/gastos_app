@@ -15,6 +15,7 @@ class TXMainAppBarWidget extends StatefulWidget {
   final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
   final bool hideLeading;
+  final Color? textColor;
 
   const TXMainAppBarWidget(
       {Key? key,
@@ -26,7 +27,9 @@ class TXMainAppBarWidget extends StatefulWidget {
       this.floatingActionButton,
       this.floatingActionButtonLocation,
       this.onLeadingTap,
-      this.hideLeading = false})
+      this.hideLeading = false,
+      this.textColor
+      })
       : super(key: key);
 
   @override
@@ -51,7 +54,7 @@ class _TXMainAppBarWidgetState extends State<TXMainAppBarWidget> {
           maxLines: 1,
           textOverflow: TextOverflow.ellipsis,
           size: 20,
-          color: R.color.whiteColor,
+          color: widget.textColor,
         ),
         actions: widget.actions,
       ),

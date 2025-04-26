@@ -10,6 +10,7 @@ import 'package:gastos_app/domain/common/i_common_repository.dart';
 import 'package:gastos_app/domain/user/i_user_converter.dart';
 import 'package:gastos_app/domain/user/i_user_dao.dart';
 import 'package:gastos_app/domain/user/i_user_repository.dart';
+import 'package:gastos_app/ui/create_expense/create_expense_bloc.dart';
 import 'package:gastos_app/ui/home/home_bloc.dart';
 import 'package:gastos_app/ui/splash/splash_bloc.dart';
 import 'package:kiwi/kiwi.dart';
@@ -99,6 +100,7 @@ class Injector {
     container.registerFactory((c) => HomeBloC());
     container.registerFactory((c) => SplashBloc(
         c.resolve(), c.resolve()));
+    container.registerFactory((c) => CreateExpenseBloc());
   }
 
   _registerCommon() {

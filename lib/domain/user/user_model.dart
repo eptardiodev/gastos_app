@@ -5,11 +5,11 @@ class UserModel {
   String userId;
   // String logoUrl;
   // bool hasLogo;
-  String firstName;
-  String lastName;
+  String? firstName;
+  String? lastName;
   // String middleName;
-  String fullName;
-  String email;
+  String? fullName;
+  String? email;
   // String title;
   // String secondaryEmail;
   // String webSite;
