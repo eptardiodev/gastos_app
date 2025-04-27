@@ -1,9 +1,9 @@
 class ExpenseModel {
 
   final DateTime? date;
-  late final String? product;
-  final double? price;
-  final int? amount;
+  late final String? product;       //edua resulve y explicame esto papa
+  late final double? price;        //edua resulve y explicame esto papa
+  late final int? amount;          //edua resulve y explicame esto papa
 
 
   ExpenseModel({

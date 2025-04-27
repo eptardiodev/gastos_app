@@ -6,10 +6,7 @@ import 'package:gastos_app/ui/create_expense/create_expense_page.dart';
 import '../../domain/expense/expense_model.dart';
 import 'home_bloc.dart';
 
-
-
 class HomePage extends StatefulWidget {
-
   const HomePage({super.key});
 
   @override
@@ -17,8 +14,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
-
-
   @override
   Widget buildWidget(BuildContext context) {
     return Scaffold(
@@ -26,18 +21,13 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
         backgroundColor: R.color.primaryColor,
         onPressed: () async {
           ExpenseModel newExpense = ExpenseModel(
-              date: DateTime.now(),
-              product: "rdytf",
-              price: 0.0,
-              amount: 0
-          );
+              date: DateTime.now(), product: "", price: 0.0, amount: 0);
 
-          final ExpenseModel? res = await NavigationUtils.push(context, CreateExpenseWidget(
-            expense: newExpense,
-          ));
-          if(res != null){
-            print(res.product);
-          }
+          final ExpenseModel? res = await NavigationUtils.push(
+              context,
+              CreateExpenseWidget(
+                expense: newExpense,
+              ));
         },
         child: Container(
           padding: const EdgeInsets.all(5),
@@ -52,23 +42,19 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
         ),
       ),
       body: Center(
-        child: Column(
-          children: [],
-        )
-      ),
+          child: Column(
+        children: [],
+      )),
       appBar: AppBar(
         automaticallyImplyLeading: true,
-        title: Text("Gastos",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold
-          ),),
+        title: Text(
+          "Gastos",
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         backgroundColor: R.color.primaryColor,
       ),
-      drawer: Drawer(
-
-      ),
+      drawer: Drawer(),
     );
   }
 }

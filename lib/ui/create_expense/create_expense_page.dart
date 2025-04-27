@@ -6,9 +6,7 @@ import 'package:gastos_app/ui/create_expense/create_expense_bloc.dart';
 import 'package:gastos_app/ui/tx_widgets/tx_main_app_bar_widget.dart';
 import 'package:intl/intl.dart';
 
-
 class CreateExpenseWidget extends StatefulWidget {
-
   final ExpenseModel? expense;
 
   CreateExpenseWidget({
@@ -20,27 +18,25 @@ class CreateExpenseWidget extends StatefulWidget {
   State<CreateExpenseWidget> createState() => _CreateExpenseWidgetState();
 }
 
-
 final productController = TextEditingController();
 final priceController = TextEditingController();
 final amountController = TextEditingController();
 
-List<String> uMedidas = ["Kg","Lb","Paquetes","Maso"];
+List<String> uMedidas = ["Kg", "Lb", "Paquetes", "Maso"];
 String? unidadSelected;
 ExpenseModel newExpense = ExpenseModel();
 
 final List<DropdownMenuItem<String>> dropDownMenuItems = uMedidas
     .map(
       (String value) => DropdownMenuItem<String>(
-    value: value,
-    child: Text(value),
-  ),
-)
+        value: value,
+        child: Text(value),
+      ),
+    )
     .toList();
 
 class _CreateExpenseWidgetState
     extends StateWithBloC<CreateExpenseWidget, CreateExpenseBloc> {
-
   @override
   void initState() {
     super.initState();
@@ -55,7 +51,6 @@ class _CreateExpenseWidgetState
     productController.clear();
     priceController.clear();
     amountController.clear();
-
   }
 
   @override
@@ -86,11 +81,13 @@ class _CreateExpenseWidgetState
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Text("Date: ${formattedDate}",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 22,
-                  ),),
+                  child: Text(
+                    "Date: ${formattedDate}",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 22,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -109,15 +106,14 @@ class _CreateExpenseWidgetState
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
                       controller: productController,
-                      onChanged: (value){
+                      onChanged: (value) {
                         widget.expense!.product = value;
                       },
                       decoration: InputDecoration(
-                        labelText: 'Expense Product',
-                        border: const OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10.0))
-                        )
-                      ),
+                          labelText: 'Expense Product',
+                          border: const OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)))),
                     ),
                   ),
                 )
@@ -138,13 +134,16 @@ class _CreateExpenseWidgetState
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
                       controller: priceController,
+                      onChanged: (value) {
+                        double doublePrice = double.parse(value);
+                        widget.expense!.price = doublePrice;
+                      },
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                           labelText: 'Amount Spent',
                           border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0))
-                          )
-                      ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)))),
                     ),
                   ),
                 )
@@ -165,6 +164,10 @@ class _CreateExpenseWidgetState
                     padding: const EdgeInsets.all(8.0),
                     child: TextField(
                       controller: amountController,
+                      onChanged: (value) {
+                        int intAmount = int.parse(value);
+                        widget.expense!.amount = intAmount;
+                      },
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                           suffixIcon: DropdownButton(
@@ -174,17 +177,14 @@ class _CreateExpenseWidgetState
                                 if (newValue != null) {
                                   setState(() => unidadSelected = newValue);
                                 }
-                              }
-                          ),
+                              }),
                           labelText: 'Product Quantity',
                           border: const OutlineInputBorder(
-                              borderRadius: BorderRadius.all(Radius.circular(10.0))
-                          )
-                      ),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(10.0)))),
                     ),
                   ),
                 ),
-
               ],
             ),
           ],
