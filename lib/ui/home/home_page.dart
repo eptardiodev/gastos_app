@@ -3,6 +3,7 @@ import 'package:gastos_app/base/bloc_state.dart';
 import 'package:flutter/material.dart';
 import 'package:gastos_app/base/navigation_utils.dart';
 import 'package:gastos_app/ui/create_expense/create_expense_page.dart';
+import '../../domain/expense/expense_model.dart';
 import 'home_bloc.dart';
 
 
@@ -23,8 +24,20 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         backgroundColor: R.color.primaryColor,
-        onPressed: () {
-          NavigationUtils.push(context, CreateExpenseWidget());
+        onPressed: () async {
+          ExpenseModel newExpense = ExpenseModel(
+              date: DateTime.now(),
+              product: "rdytf",
+              price: 0.0,
+              amount: 0
+          );
+
+          final ExpenseModel? res = await NavigationUtils.push(context, CreateExpenseWidget(
+            expense: newExpense,
+          ));
+          if(res != null){
+            print(res.product);
+          }
         },
         child: Container(
           padding: const EdgeInsets.all(5),
