@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 class CreateExpenseWidget extends StatefulWidget {
   final ExpenseModel? expense;
 
-  CreateExpenseWidget({
+  const CreateExpenseWidget({
     this.expense,
     super.key,
   });
@@ -18,50 +18,53 @@ class CreateExpenseWidget extends StatefulWidget {
   State<CreateExpenseWidget> createState() => _CreateExpenseWidgetState();
 }
 
-final productController = TextEditingController();
-final priceController = TextEditingController();
-final amountController = TextEditingController();
+class _CreateExpenseWidgetState
+    extends StateWithBloC<CreateExpenseWidget, CreateExpenseBloc> {
 
-List<String> uMedidas = ["Kg", "Lb", "Paquetes", "Maso"];
-String? unidadSelected;
-ExpenseModel newExpense = ExpenseModel();
+  final productController = TextEditingController();
+  final priceController = TextEditingController();
+  final amountController = TextEditingController();
 
-final List<DropdownMenuItem<String>> dropDownMenuItems = uMedidas
-    .map(
+  final List<String> uMedidas = ["Kg", "Lb", "Paquetes", "Maso"];
+  String? unidadSelected;
+
+  late final List<DropdownMenuItem<String>> dropDownMenuItems;
+  late ExpenseModel newExpense;
+
+
+  @override
+  void initState() {
+    super.initState();
+    newExpense = widget.expense ?? ExpenseModel(date: DateTime.now());
+    productController.text = widget.expense?.product ?? '';
+
+    /// aqui se genera una lista de DropdownMenuItem por cada valor de la lista
+    /// de medidas. (borrar este comentario)
+    dropDownMenuItems = uMedidas.map(
       (String value) => DropdownMenuItem<String>(
         value: value,
         child: Text(value),
       ),
-    )
-    .toList();
-
-class _CreateExpenseWidgetState
-    extends StateWithBloC<CreateExpenseWidget, CreateExpenseBloc> {
-  @override
-  void initState() {
-    super.initState();
-    newExpense = widget.expense!;
-    productController.text = widget.expense!.product!;
+    ).toList();
   }
 
   @override
   void dispose() {
     super.dispose();
-
-    productController.clear();
-    priceController.clear();
-    amountController.clear();
+    productController.dispose();
+    priceController.dispose();
+    amountController.dispose();
   }
 
   @override
   Widget buildWidget(BuildContext context) {
-    DateTime date = widget.expense!.date ?? DateTime.now();
+    DateTime date = newExpense.date ?? DateTime.now();
     String formattedDate = DateFormat('dd/MM/yyyy  hh:mm a').format(date);
-    //String format = "${date.day}/${date.month}/${date.year}  ${date.hour}:${date.minute}";
+
 
     return WillPopScope(
       onWillPop: () async {
-        NavigationUtils.pop(context, result: widget.expense);
+        NavigationUtils.pop(context, result: newExpense);
         return false;
       },
       child: TXMainAppBarWidget(
@@ -82,7 +85,13 @@ class _CreateExpenseWidgetState
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Text(
-                    "Date: ${formattedDate}",
+                    /// aqui la interpolacion no es necesaria el uso de {}
+                    /// por ejemplo:
+                    /// "Date: ${hoy}" es igual que poner "Date: $hoy"
+                    /// porque es una sola palabra, pero cuando es de este otro
+                    /// tipo si tienes que acotar entre {}
+                    /// "Date: ${hoy.name}" o "Costo: ${price.toString()}"
+                    "Date: $formattedDate",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 22,
@@ -107,13 +116,13 @@ class _CreateExpenseWidgetState
                     child: TextField(
                       controller: productController,
                       onChanged: (value) {
-                        widget.expense!.product = value;
+                        newExpense.product = value;
                       },
                       decoration: InputDecoration(
                           labelText: 'Expense Product',
                           border: const OutlineInputBorder(
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)))),
+                              BorderRadius.all(Radius.circular(10.0)))),
                     ),
                   ),
                 )
@@ -135,15 +144,34 @@ class _CreateExpenseWidgetState
                     child: TextField(
                       controller: priceController,
                       onChanged: (value) {
-                        double doublePrice = double.parse(value);
-                        widget.expense!.price = doublePrice;
+                        try{
+                          /// esto convierte a los valores
+                          /// estudiate el uso de parse y tryParse
+                          /// la diferencia es que parse solo convierte valores
+                          /// que sean validos porque lo que hay que tener cuidado
+                          /// y devuelve no nulos. o sea no puede fallar. por eso
+                          /// lo encierra en un try catch para si hay error que ejecute el cath y no
+                          /// rompa la app.
+                          /// sin embargo el tryParse devuleve un null si no se pudo
+                          /// convertir
+                          /// ejemplo
+                          /// double? doublePrice = double.tryParse(value);
+                          /// y ahi luego if(doubleParse != null){
+                          /// bla bla
+                          /// }
+                          double doublePrice = double.parse(value);
+                          newExpense.price = doublePrice;
+                        } catch (e){
+                          // Manejo de errores en caso de que la entrada no sea un número válido.
+                          print("Error al convertir a double: $e"); //O mostrar un SnackBar o Dialog
+                        }
                       },
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                           labelText: 'Amount Spent',
                           border: const OutlineInputBorder(
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)))),
+                              BorderRadius.all(Radius.circular(10.0)))),
                     ),
                   ),
                 )
@@ -165,8 +193,13 @@ class _CreateExpenseWidgetState
                     child: TextField(
                       controller: amountController,
                       onChanged: (value) {
-                        int intAmount = int.parse(value);
-                        widget.expense!.amount = intAmount;
+                        try{
+                          int intAmount = int.parse(value);
+                          newExpense.amount = intAmount;
+                        } catch (e){
+                          // Manejo de errores para el parseo de int
+                          print("Error al convertir a int: $e"); // Mostrar un mensaje de error
+                        }
                       },
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
@@ -181,7 +214,7 @@ class _CreateExpenseWidgetState
                           labelText: 'Product Quantity',
                           border: const OutlineInputBorder(
                               borderRadius:
-                                  BorderRadius.all(Radius.circular(10.0)))),
+                              BorderRadius.all(Radius.circular(10.0)))),
                     ),
                   ),
                 ),

@@ -28,6 +28,7 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
               CreateExpenseWidget(
                 expense: newExpense,
               ));
+          print(res);
         },
         child: Container(
           padding: const EdgeInsets.all(5),
