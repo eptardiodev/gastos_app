@@ -15,7 +15,7 @@ class RemoteConstants {
   static const unable_host_massage = 'Failed host lookup:';
   static const software_caused_connection_abort = 'Software caused connection abort';
 
-  static const nameApp = "GastosApp";
+  static const nameApp = "My expenses";
 
   /// User Model
   static const user_id = "UserId";
