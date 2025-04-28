@@ -14,6 +14,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
+  List<ExpenseModel> expenseList = [];
+
   @override
   Widget buildWidget(BuildContext context) {
     return Scaffold(
@@ -28,7 +30,11 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
               CreateExpenseWidget(
                 expense: newExpense,
               ));
-          print(res);
+          if (res != null && (res.product ?? "").isNotEmpty) {
+            setState(() {
+              expenseList.add(res);
+            });
+          }
         },
         child: Container(
           padding: const EdgeInsets.all(5),
@@ -42,10 +48,56 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
           ),
         ),
       ),
-      body: Center(
-          child: Column(
-        children: [],
-      )),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.only(left: 20, right: 12),
+              title: Text(
+                R.string.products,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold, fontSize: 20,
+                  color: R.color.grayDarkestColor
+                ),
+              ),
+              trailing: Text(
+                R.string.price,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 20,
+                    color: R.color.grayDarkestColor
+                ),
+              ),
+            ),
+            Divider(),
+            SingleChildScrollView(
+              child: ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: expenseList.length,
+                  itemBuilder: (context, index) {
+                    final ExpenseModel expense = expenseList[index];
+                    return Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 5),
+                          child: Text(index.toString()),
+                        ),
+                        Expanded(
+                          child: ListTile(
+                            contentPadding: EdgeInsets.only(left: 10, right: 25),
+                            title: Text(expense.product ?? ""),
+                            trailing: Text("\$${expense.price}"),
+                          ),
+                        ),
+                      ],
+                    );
+                  }),
+            ),
+          ],
+        ),
+      ),
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: Text(

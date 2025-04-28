@@ -14,6 +14,8 @@
   "ok": "Ok",
   "operationConfirmation": "Está seguro de esta operación?",
   "permissionDenied": "Permiso denegado",
+  "price": "Precio",
+  "products": "Productos",
   "qrScanner": "QR",
   "no": "No",
   "yes": "Si"

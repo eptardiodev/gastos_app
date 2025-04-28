@@ -42,6 +42,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "Are you sure of this operation?"),
         "permissionDenied":
             MessageLookupByLibrary.simpleMessage("Permission denied"),
+        "price": MessageLookupByLibrary.simpleMessage("Price"),
+        "products": MessageLookupByLibrary.simpleMessage("Products"),
         "qrScanner": MessageLookupByLibrary.simpleMessage("QR"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes")
       };
