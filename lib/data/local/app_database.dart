@@ -39,6 +39,7 @@ class AppDatabase {
   Future _createTables(Database db) async {
     await _createTable(db, DBConstants.authenticatedEntityTable, DBConstants.tableCols);
     await _createTable(db, DBConstants.profileTable, DBConstants.tableCols);
+    await _createTable(db, DBConstants.expensesTable, DBConstants.tableExpensesCols);
   }
 
   static Future<bool> _createTable(

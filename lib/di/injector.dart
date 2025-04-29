@@ -1,12 +1,17 @@
 
 
+import 'package:gastos_app/data/converter/expense_converter.dart';
 import 'package:gastos_app/data/converter/user_converter.dart';
 import 'package:gastos_app/data/dao/common_dao.dart';
+import 'package:gastos_app/data/dao/expense_dao.dart';
 import 'package:gastos_app/data/dao/user_dao.dart';
+import 'package:gastos_app/data/repository/expense_repository.dart';
 import 'package:gastos_app/data/repository/user_repository.dart';
 import 'package:gastos_app/data/shared_preferences/shared_preferences_managment.dart';
 import 'package:gastos_app/domain/common/i_common_dao.dart';
 import 'package:gastos_app/domain/common/i_common_repository.dart';
+import 'package:gastos_app/domain/expense/i_expense_dao.dart';
+import 'package:gastos_app/domain/expense/i_expense_repository.dart';
 import 'package:gastos_app/domain/user/i_user_converter.dart';
 import 'package:gastos_app/domain/user/i_user_dao.dart';
 import 'package:gastos_app/domain/user/i_user_repository.dart';
@@ -74,6 +79,7 @@ class Injector {
   _registerMappers() {
     container.registerSingleton<I2faConverter>((c) => TwoFaConverter());
     container.registerSingleton((c) => UserConverter());
+    container.registerSingleton((c) => ExpenseConverter());
   }
 
   _registerDaoLayer() {
@@ -84,6 +90,8 @@ class Injector {
         c.resolve(), c.resolve()));
     container.registerSingleton<IUserDao>((c) => UserDao(
         c.resolve(), c.resolve()));
+    container.registerSingleton<IExpenseDao>((c) => ExpenseDao(
+        c.resolve(), c.resolve()));
   }
 
   _registerRepositoryLayer() {
@@ -93,11 +101,13 @@ class Injector {
         c.resolve()));
     container.registerSingleton<IUserRepository>((c) => UserRepository(
         c.resolve(), c.resolve(), c.resolve(),));
+    container.registerSingleton<IExpenseRepository>((c) => ExpenseRepository(
+      c.resolve(), c.resolve(), c.resolve()));
   }
 
   _registerBloCs() {
     container.registerFactory((c) => BaseAppBloC());
-    container.registerFactory((c) => HomeBloC());
+    container.registerFactory((c) => HomeBloC(c.resolve()));
     container.registerFactory((c) => SplashBloc(
         c.resolve(), c.resolve()));
     container.registerFactory((c) => CreateExpenseBloc());

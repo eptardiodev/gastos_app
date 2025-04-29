@@ -3,6 +3,7 @@ import 'package:gastos_app/base/bloc_state.dart';
 import 'package:flutter/material.dart';
 import 'package:gastos_app/base/navigation_utils.dart';
 import 'package:gastos_app/ui/create_expense/create_expense_page.dart';
+import 'package:uuid/uuid.dart';
 import '../../domain/expense/expense_model.dart';
 import 'home_bloc.dart';
 
@@ -14,7 +15,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
-  List<ExpenseModel> expenseList = [];
+
+  @override
+  void initState(){
+    super.initState();
+    bloc.init();
+  }
+
 
   @override
   Widget buildWidget(BuildContext context) {
@@ -23,7 +30,11 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
         backgroundColor: R.color.primaryColor,
         onPressed: () async {
           ExpenseModel newExpense = ExpenseModel(
-              date: DateTime.now(), product: "", price: 0.0, amount: 0);
+            id: Uuid().v1(),
+            date: DateTime.now(),
+            product: "",
+            price: 0.0,
+            amount: 0);
 
           final ExpenseModel? res = await NavigationUtils.push(
               context,
@@ -31,9 +42,7 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
                 expense: newExpense,
               ));
           if (res != null && (res.product ?? "").isNotEmpty) {
-            setState(() {
-              expenseList.add(res);
-            });
+            await bloc.saveExpense(res);
           }
         },
         child: Container(
@@ -72,28 +81,35 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
             ),
             Divider(),
             SingleChildScrollView(
-              child: ListView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  itemCount: expenseList.length,
-                  itemBuilder: (context, index) {
-                    final ExpenseModel expense = expenseList[index];
-                    return Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 5),
-                          child: Text(index.toString()),
-                        ),
-                        Expanded(
-                          child: ListTile(
-                            contentPadding: EdgeInsets.only(left: 10, right: 25),
-                            title: Text(expense.product ?? ""),
-                            trailing: Text("\$${expense.price}"),
-                          ),
-                        ),
-                      ],
-                    );
-                  }),
+              child: StreamBuilder<List<ExpenseModel>>(
+                stream: bloc.expenseListStream,
+                initialData: [],
+                builder: (context, snapshot) {
+                  final List<ExpenseModel> expenseList = snapshot.data ?? [];
+                  return ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: expenseList.length,
+                      itemBuilder: (context, index) {
+                        final ExpenseModel expense = expenseList[index];
+                        return Row(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(left: 5),
+                              child: Text((index + 1).toString()),
+                            ),
+                            Expanded(
+                              child: ListTile(
+                                contentPadding: EdgeInsets.only(left: 10, right: 25),
+                                title: Text(expense.product ?? ""),
+                                trailing: Text("\$${expense.price}"),
+                              ),
+                            ),
+                          ],
+                        );
+                      });
+                }
+              ),
             ),
           ],
         ),
@@ -101,7 +117,7 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: Text(
-          "Gastos",
+          "R.string.expenses",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,

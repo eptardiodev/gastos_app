@@ -66,6 +66,14 @@ class RemoteConstants {
   // static const address_list = "AddressList";
   static const first_logged_on = "FirstLoggedOn";
 
+  /// expense
+  static const id = "id";
+  static const date = "date";
+  static const product = "product";
+  static const price = "price";
+  static const amount = "amount";
+
+
   static const name = "Name";
   static const color = "Color";
 
