@@ -140,6 +140,16 @@ class S {
     );
   }
 
+  /// `expenses`
+  String get expenses {
+    return Intl.message(
+      'expenses',
+      name: 'expenses',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Field required`
   String get fieldRequired {
     return Intl.message(

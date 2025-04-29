@@ -34,6 +34,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Enable permission in settings?"),
         "enterKeyManually":
             MessageLookupByLibrary.simpleMessage("Enter key manually"),
+        "expenses": MessageLookupByLibrary.simpleMessage("expenses"),
         "fieldRequired": MessageLookupByLibrary.simpleMessage("Field required"),
         "hello": MessageLookupByLibrary.simpleMessage("Hello"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
