@@ -6,6 +6,7 @@ import 'package:gastos_app/data/local/db_constants.dart';
 import 'package:gastos_app/domain/expense/expense_model.dart';
 import 'package:gastos_app/domain/expense/i_expense_dao.dart';
 import 'package:gastos_app/utils/extensions.dart';
+import 'package:intl/intl.dart';
 import 'package:sqflite/sqlite_api.dart';
 
 class ExpenseDao implements IExpenseDao {
@@ -35,9 +36,15 @@ class ExpenseDao implements IExpenseDao {
   Future<bool> saveExpense(ExpenseModel expense) async {
     try {
       Database db = await _appDatabase.db;
+      ///se agrega date para poder filtrar por date luego, pero eso debe cambiar
+      ///
+      String formattedDate = expense.date != null
+          ? DateFormat('yyyy-MM-dd HH:mm:ss').format(expense.date!)
+          : "";
+
       final map = {
         DBConstants.idKey: expense.id,
-        DBConstants.date: expense.date,
+        DBConstants.date: formattedDate,
         DBConstants.dataKey: json.encode(_expenseConverter.toJson(expense)),
       };
       await db.insert(DBConstants.expensesTable, map,
