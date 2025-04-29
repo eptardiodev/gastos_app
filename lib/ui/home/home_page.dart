@@ -117,7 +117,7 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
       appBar: AppBar(
         automaticallyImplyLeading: true,
         title: Text(
-          "R.string.expenses",
+          R.string.expenses,
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
