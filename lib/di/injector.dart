@@ -1,17 +1,63 @@
 
 
+import 'package:gastos_app/data/converter/category_converter.dart';
 import 'package:gastos_app/data/converter/expense_converter.dart';
+import 'package:gastos_app/data/converter/list_item_converter.dart';
+import 'package:gastos_app/data/converter/list_template_converter.dart';
+import 'package:gastos_app/data/converter/product_converter.dart';
+import 'package:gastos_app/data/converter/shopping_list_converter.dart';
+import 'package:gastos_app/data/converter/subcategory_converter.dart';
+import 'package:gastos_app/data/converter/transaction_converter.dart';
 import 'package:gastos_app/data/converter/user_converter.dart';
+import 'package:gastos_app/data/dao/category_dao.dart';
 import 'package:gastos_app/data/dao/common_dao.dart';
 import 'package:gastos_app/data/dao/expense_dao.dart';
+import 'package:gastos_app/data/dao/list_item_dao.dart';
+import 'package:gastos_app/data/dao/list_template_dao.dart';
+import 'package:gastos_app/data/dao/measurement_unit_dao.dart';
+import 'package:gastos_app/data/dao/product_dao.dart';
+import 'package:gastos_app/data/dao/shopping_list_dao.dart';
+import 'package:gastos_app/data/dao/subcategory_dao.dart';
+import 'package:gastos_app/data/dao/transaction_dao.dart';
 import 'package:gastos_app/data/dao/user_dao.dart';
+import 'package:gastos_app/data/repository/category_repository.dart';
 import 'package:gastos_app/data/repository/expense_repository.dart';
+import 'package:gastos_app/data/repository/list_item_repository.dart';
+import 'package:gastos_app/data/repository/list_template_repository.dart';
+import 'package:gastos_app/data/repository/measurement_unit_repository.dart';
+import 'package:gastos_app/data/repository/product_repository.dart';
+import 'package:gastos_app/data/repository/shopping_list_repository.dart';
+import 'package:gastos_app/data/repository/subcategory_repository.dart';
+import 'package:gastos_app/data/repository/transaction_repository.dart';
 import 'package:gastos_app/data/repository/user_repository.dart';
 import 'package:gastos_app/data/shared_preferences/shared_preferences_managment.dart';
+import 'package:gastos_app/domain/category/i_category_converter.dart';
+import 'package:gastos_app/domain/category/i_category_dao.dart';
+import 'package:gastos_app/domain/category/i_category_repository.dart';
 import 'package:gastos_app/domain/common/i_common_dao.dart';
 import 'package:gastos_app/domain/common/i_common_repository.dart';
 import 'package:gastos_app/domain/expense/i_expense_dao.dart';
 import 'package:gastos_app/domain/expense/i_expense_repository.dart';
+import 'package:gastos_app/domain/list_item/i_list_item_converter.dart';
+import 'package:gastos_app/domain/list_item/i_list_item_dao.dart';
+import 'package:gastos_app/domain/list_item/i_list_item_repository.dart';
+import 'package:gastos_app/domain/list_template/i_list_template_converter.dart';
+import 'package:gastos_app/domain/list_template/i_list_template_dao.dart';
+import 'package:gastos_app/domain/list_template/i_list_template_repository.dart';
+import 'package:gastos_app/domain/measurement_unit_model/i_measurement_unit_dao.dart';
+import 'package:gastos_app/domain/measurement_unit_model/i_measurement_unit_repository.dart';
+import 'package:gastos_app/domain/product/i_product_converter.dart';
+import 'package:gastos_app/domain/product/i_product_dao.dart';
+import 'package:gastos_app/domain/product/i_product_repository.dart';
+import 'package:gastos_app/domain/shopping_list/i_shopping_list_converter.dart';
+import 'package:gastos_app/domain/shopping_list/i_shopping_list_dao.dart';
+import 'package:gastos_app/domain/shopping_list/i_shopping_list_repository.dart';
+import 'package:gastos_app/domain/subcategory/i_subcategory_converter.dart';
+import 'package:gastos_app/domain/subcategory/i_subcategory_dao.dart';
+import 'package:gastos_app/domain/subcategory/i_subcategory_repository.dart';
+import 'package:gastos_app/domain/transaction/i_transaction_converter.dart';
+import 'package:gastos_app/domain/transaction/i_transaction_dao.dart';
+import 'package:gastos_app/domain/transaction/i_transaction_repository.dart';
 import 'package:gastos_app/domain/user/i_user_converter.dart';
 import 'package:gastos_app/domain/user/i_user_dao.dart';
 import 'package:gastos_app/domain/user/i_user_repository.dart';
@@ -80,6 +126,13 @@ class Injector {
     container.registerSingleton<I2faConverter>((c) => TwoFaConverter());
     container.registerSingleton((c) => UserConverter());
     container.registerSingleton((c) => ExpenseConverter());
+    container.registerSingleton<ICategoryConverter>((c) => CategoryConverter());
+    container.registerSingleton<ISubcategoryConverter>((c) => SubcategoryConverter());
+    container.registerSingleton<IListItemConverter>((c) => ListItemConverter());
+    container.registerSingleton<IListTemplateConverter>((c) => ListTemplateConverter());
+    container.registerSingleton<IProductConverter>((c) => ProductConverter());
+    container.registerSingleton<ITransactionConverter>((c) => TransactionConverter());
+    container.registerSingleton<IShoppingListConverter>((c) => ShoppingListConverter());
   }
 
   _registerDaoLayer() {
@@ -92,6 +145,23 @@ class Injector {
         c.resolve(), c.resolve()));
     container.registerSingleton<IExpenseDao>((c) => ExpenseDao(
         c.resolve(), c.resolve()));
+    container.registerSingleton<ICategoryDao>((c) => CategoryDao(
+        c.resolve()));
+    container.registerSingleton<ISubcategoryDao>((c) => SubcategoryDao(
+        c.resolve()));
+    container.registerSingleton<IListItemDao>((c) => ListItemDao(
+        c.resolve()));
+    container.registerSingleton<IListTemplateDao>((c) => ListTemplateDao(
+        c.resolve()));
+    container.registerSingleton<IMeasurementUnitDao>((c) => MeasurementUnitDao(
+        c.resolve()));
+    container.registerSingleton<IProductDao>((c) => ProductDao(
+        c.resolve()));
+    container.registerSingleton<ITransactionDao>((c) => TransactionDao(
+        c.resolve()));
+    container.registerSingleton<IShoppingListDao>((c) => ShoppingListDao(
+        c.resolve()));
+
   }
 
   _registerRepositoryLayer() {
@@ -103,6 +173,14 @@ class Injector {
         c.resolve(), c.resolve(), c.resolve(),));
     container.registerSingleton<IExpenseRepository>((c) => ExpenseRepository(
       c.resolve(), c.resolve(), c.resolve()));
+    container.registerSingleton<ICategoryRepository>((c) => CategoryRepository());
+    container.registerSingleton<ISubcategoryRepository>((c) => SubcategoryRepository());
+    container.registerSingleton<IListItemRepository>((c) => ListItemRepository());
+    container.registerSingleton<IListTemplateRepository>((c) => ListTemplateRepository());
+    container.registerSingleton<IMeasurementUnitRepository>((c) => MeasurementUnitRepository());
+    container.registerSingleton<IProductRepository>((c) => ProductRepository());
+    container.registerSingleton<ITransactionRepository>((c) => TransactionRepository());
+    container.registerSingleton<IShoppingListRepository>((c) => ShoppingListRepository());
   }
 
   _registerBloCs() {

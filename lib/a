@@ -1,0 +1,1012 @@
+# Implementación de la Base de Datos en Flutter con SQLite
+
+A continuación te muestro cómo implementar la estructura de base de datos que diseñamos, pero usando SQLite en Flutter. Usaremos el paquete `sqflite` que es el más popular para trabajar con SQLite en Flutter.
+
+## 1. Configuración inicial
+
+Primero, agrega las dependencias necesarias en tu `pubspec.yaml`:
+
+```yaml
+dependencies:
+  sqflite: ^2.2.8
+  path: ^1.8.3
+  intl: ^0.18.1
+```
+
+## 2. Clase DatabaseHelper
+
+Crea un archivo `database_helper.dart` que manejará toda la interacción con la base de datos:
+
+```dart
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+
+class DatabaseHelper {
+  static final DatabaseHelper instance = DatabaseHelper._init();
+  static Database? _database;
+
+  DatabaseHelper._init();
+
+  Future<Database> get database async {
+    if (_database != null) return _database!;
+    _database = await _initDB('personal_finance.db');
+    return _database!;
+  }
+
+  Future<Database> _initDB(String filePath) async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, filePath);
+
+    return await openDatabase(
+      path,
+      version: 1,
+      onCreate: _createDB,
+    );
+  }
+
+  Future _createDB(Database db, int version) async {
+    // Tipos de datos en SQLite:
+    // INTEGER, TEXT, REAL (decimal), BLOB, NUMERIC
+
+    // Crear tablas
+    await db.execute('''
+      CREATE TABLE categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        icon_name TEXT,
+        color_hex TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE subcategories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        category_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE,
+        UNIQUE(category_id, name)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE measurement_units (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE,
+        symbol TEXT NOT NULL UNIQUE
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE products (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        subcategory_id INTEGER NOT NULL,
+        name TEXT NOT NULL,
+        description TEXT,
+        common_unit TEXT,
+        FOREIGN KEY (subcategory_id) REFERENCES subcategories (id) ON DELETE CASCADE,
+        UNIQUE(subcategory_id, name)
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE shopping_lists (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        name TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        last_used TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE list_items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        list_id INTEGER NOT NULL,
+        product_id INTEGER NOT NULL,
+        quantity REAL,
+        unit_id INTEGER,
+        is_checked INTEGER DEFAULT 0,
+        added_at TEXT NOT NULL,
+        FOREIGN KEY (list_id) REFERENCES shopping_lists (id) ON DELETE CASCADE,
+        FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE,
+        FOREIGN KEY (unit_id) REFERENCES measurement_units (id) ON DELETE SET NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE transactions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        product_id INTEGER,
+        amount REAL NOT NULL,
+        quantity REAL,
+        unit_id INTEGER,
+        place TEXT,
+        date TEXT NOT NULL,
+        notes TEXT,
+        FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE SET NULL,
+        FOREIGN KEY (unit_id) REFERENCES measurement_units (id) ON DELETE SET NULL
+      )
+    ''');
+
+    // Insertar datos iniciales
+    await _insertInitialData(db);
+  }
+
+  Future _insertInitialData(Database db) async {
+    // Unidades básicas
+    await db.insert('measurement_units', {'name': 'Unidad', 'symbol': 'u'});
+    await db.insert('measurement_units', {'name': 'Kilogramo', 'symbol': 'kg'});
+    await db.insert('measurement_units', {'name': 'Litro', 'symbol': 'l'});
+    await db.insert('measurement_units', {'name': 'Paquete', 'symbol': 'pqt'});
+
+    // Categorías predefinidas
+    await db.insert('categories', {
+      'name': 'Alimentos',
+      'icon_name': 'shopping-cart',
+      'color_hex': '#FF6B6B'
+    });
+    await db.insert('categories', {
+      'name': 'Transporte',
+      'icon_name': 'bus',
+      'color_hex': '#4ECDC4'
+    });
+    await db.insert('categories', {
+      'name': 'Misceláneo',
+      'icon_name': 'box',
+      'color_hex': '#8395A7'
+    });
+
+    // Subcategorías de ejemplo
+    var alimentosId = await db.query('categories',
+        where: 'name = ?', whereArgs: ['Alimentos']);
+    await db.insert('subcategories', {
+      'category_id': alimentosId.first['id'],
+      'name': 'Panadería'
+    });
+    await db.insert('subcategories', {
+      'category_id': alimentosId.first['id'],
+      'name': 'Carnes'
+    });
+
+    var transporteId = await db.query('categories',
+        where: 'name = ?', whereArgs: ['Transporte']);
+    await db.insert('subcategories', {
+      'category_id': transporteId.first['id'],
+      'name': 'Combustible'
+    });
+  }
+
+  // Métodos para cerrar la base de datos
+  Future close() async {
+    final db = await instance.database;
+    db.close();
+  }
+}
+```
+
+## 3. Modelos de Datos
+
+Crea clases modelo para cada entidad. Por ejemplo, para `Category`:
+
+```dart
+class Category {
+  final int? id;
+  final String name;
+  final String? iconName;
+  final String? colorHex;
+
+  Category({
+    this.id,
+    required this.name,
+    this.iconName,
+    this.colorHex,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'icon_name': iconName,
+      'color_hex': colorHex,
+    };
+  }
+
+  factory Category.fromMap(Map<String, dynamic> map) {
+    return Category(
+      id: map['id'],
+      name: map['name'],
+      iconName: map['icon_name'],
+      colorHex: map['color_hex'],
+    );
+  }
+}
+```
+
+Similarmente, crea modelos para `Subcategory`, `Product`, `ShoppingList`, `ListItem` y `Transaction`.
+
+Aquí tienes todas las clases modelo necesarias para tu aplicación Flutter con SQLite, siguiendo la estructura de base de datos que diseñamos:
+
+### 1. **Subcategory Model**
+```dart
+class Subcategory {
+  final int? id;
+  final int categoryId;
+  final String name;
+
+  Subcategory({
+    this.id,
+    required this.categoryId,
+    required this.name,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'category_id': categoryId,
+      'name': name,
+    };
+  }
+
+  factory Subcategory.fromMap(Map<String, dynamic> map) {
+    return Subcategory(
+      id: map['id'],
+      categoryId: map['category_id'],
+      name: map['name'],
+    );
+  }
+}
+```
+
+### 2. **MeasurementUnit Model**
+```dart
+class MeasurementUnit {
+  final int? id;
+  final String name;
+  final String symbol;
+
+  MeasurementUnit({
+    this.id,
+    required this.name,
+    required this.symbol,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'symbol': symbol,
+    };
+  }
+
+  factory MeasurementUnit.fromMap(Map<String, dynamic> map) {
+    return MeasurementUnit(
+      id: map['id'],
+      name: map['name'],
+      symbol: map['symbol'],
+    );
+  }
+}
+```
+
+### 3. **Product Model**
+```dart
+class Product {
+  final int? id;
+  final int subcategoryId;
+  final String name;
+  final String? description;
+  final String? commonUnit;
+
+  Product({
+    this.id,
+    required this.subcategoryId,
+    required this.name,
+    this.description,
+    this.commonUnit,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'subcategory_id': subcategoryId,
+      'name': name,
+      'description': description,
+      'common_unit': commonUnit,
+    };
+  }
+
+  factory Product.fromMap(Map<String, dynamic> map) {
+    return Product(
+      id: map['id'],
+      subcategoryId: map['subcategory_id'],
+      name: map['name'],
+      description: map['description'],
+      commonUnit: map['common_unit'],
+    );
+  }
+}
+```
+
+### 4. **ShoppingList Model**
+```dart
+class ShoppingList {
+  final int? id;
+  final String userId;
+  final String name;
+  final DateTime createdAt;
+  final DateTime? lastUsed;
+
+  ShoppingList({
+    this.id,
+    required this.userId,
+    required this.name,
+    required this.createdAt,
+    this.lastUsed,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'name': name,
+      'created_at': createdAt.toIso8601String(),
+      'last_used': lastUsed?.toIso8601String(),
+    };
+  }
+
+  factory ShoppingList.fromMap(Map<String, dynamic> map) {
+    return ShoppingList(
+      id: map['id'],
+      userId: map['user_id'],
+      name: map['name'],
+      createdAt: DateTime.parse(map['created_at']),
+      lastUsed: map['last_used'] != null ? DateTime.parse(map['last_used']) : null,
+    );
+  }
+}
+```
+
+### 5. **ListItem Model**
+```dart
+class ListItem {
+  final int? id;
+  final int listId;
+  final int productId;
+  final double? quantity;
+  final int? unitId;
+  final bool isChecked;
+  final DateTime addedAt;
+
+  ListItem({
+    this.id,
+    required this.listId,
+    required this.productId,
+    this.quantity,
+    this.unitId,
+    this.isChecked = false,
+    required this.addedAt,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'list_id': listId,
+      'product_id': productId,
+      'quantity': quantity,
+      'unit_id': unitId,
+      'is_checked': isChecked ? 1 : 0,
+      'added_at': addedAt.toIso8601String(),
+    };
+  }
+
+  factory ListItem.fromMap(Map<String, dynamic> map) {
+    return ListItem(
+      id: map['id'],
+      listId: map['list_id'],
+      productId: map['product_id'],
+      quantity: map['quantity'],
+      unitId: map['unit_id'],
+      isChecked: map['is_checked'] == 1,
+      addedAt: DateTime.parse(map['added_at']),
+    );
+  }
+}
+```
+
+### 6. **Transaction Model**
+```dart
+class Transaction {
+  final int? id;
+  final String userId;
+  final int? productId;
+  final double amount;
+  final double? quantity;
+  final int? unitId;
+  final String? place;
+  final DateTime date;
+  final String? notes;
+
+  Transaction({
+    this.id,
+    required this.userId,
+    this.productId,
+    required this.amount,
+    this.quantity,
+    this.unitId,
+    this.place,
+    required this.date,
+    this.notes,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'product_id': productId,
+      'amount': amount,
+      'quantity': quantity,
+      'unit_id': unitId,
+      'place': place,
+      'date': date.toIso8601String(),
+      'notes': notes,
+    };
+  }
+
+  factory Transaction.fromMap(Map<String, dynamic> map) {
+    return Transaction(
+      id: map['id'],
+      userId: map['user_id'],
+      productId: map['product_id'],
+      amount: map['amount'],
+      quantity: map['quantity'],
+      unitId: map['unit_id'],
+      place: map['place'],
+      date: DateTime.parse(map['date']),
+      notes: map['notes'],
+    );
+  }
+}
+```
+
+### 7. **ListTemplate Model** (Opcional)
+```dart
+class ListTemplate {
+  final int? id;
+  final String userId;
+  final String name;
+  final int? createdFromListId;
+
+  ListTemplate({
+    this.id,
+    required this.userId,
+    required this.name,
+    this.createdFromListId,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'name': name,
+      'created_from': createdFromListId,
+    };
+  }
+
+  factory ListTemplate.fromMap(Map<String, dynamic> map) {
+    return ListTemplate(
+      id: map['id'],
+      userId: map['user_id'],
+      name: map['name'],
+      createdFromListId: map['created_from'],
+    );
+  }
+}
+```
+
+### Uso de los modelos con DatabaseHelper
+
+Para usar estos modelos con el `DatabaseHelper` que creamos anteriormente, puedes añadir métodos específicos para cada modelo. Por ejemplo, para `Product`:
+
+```dart
+// En DatabaseHelper
+Future<int> insertProduct(Product product) async {
+  final db = await database;
+  
+  // Verificar que la subcategoría existe
+  final subcategoryExists = await db.query(
+    'subcategories',
+    where: 'id = ?',
+    whereArgs: [product.subcategoryId],
+  );
+  
+  if (subcategoryExists.isEmpty) {
+    throw Exception('La subcategoría no existe');
+  }
+  
+  return await db.insert('products', product.toMap());
+}
+
+Future<List<Product>> getProductsBySubcategory(int subcategoryId) async {
+  final db = await database;
+  final maps = await db.query(
+    'products',
+    where: 'subcategory_id = ?',
+    whereArgs: [subcategoryId],
+  );
+  
+  return List.generate(maps.length, (i) {
+    return Product.fromMap(maps[i]);
+  });
+}
+```
+
+### Relaciones entre modelos
+
+Cuando necesites cargar datos relacionados (por ejemplo, un producto con su subcategoría y categoría), puedes crear métodos combinados:
+
+```dart
+Future<ProductWithCategory> getProductWithCategory(int productId) async {
+  final db = await database;
+  
+  final productMap = (await db.query(
+    'products',
+    where: 'id = ?',
+    whereArgs: [productId],
+  )).first;
+  
+  final subcategoryMap = (await db.query(
+    'subcategories',
+    where: 'id = ?',
+    whereArgs: [productMap['subcategory_id']],
+  )).first;
+  
+  final categoryMap = (await db.query(
+    'categories',
+    where: 'id = ?',
+    whereArgs: [subcategoryMap['category_id']],
+  )).first;
+  
+  return ProductWithCategory(
+    product: Product.fromMap(productMap),
+    subcategory: Subcategory.fromMap(subcategoryMap),
+    category: Category.fromMap(categoryMap),
+  );
+}
+
+class ProductWithCategory {
+  final Product product;
+  final Subcategory subcategory;
+  final Category category;
+
+  ProductWithCategory({
+    required this.product,
+    required this.subcategory,
+    required this.category,
+  });
+}
+```
+
+Todos estos modelos incluyen:
+- Campos correspondientes a la estructura de la base de datos
+- Métodos `toMap()` para convertir a formato de base de datos
+- Constructores `fromMap()` para crear instancias desde la base de datos
+- Tipos de datos adecuados (DateTime para fechas, int para IDs, etc.)
+- Validaciones básicas de nulabilidad según el diseño de tu esquema
+
+## 4. Operaciones CRUD
+
+Extiende el `DatabaseHelper` con métodos para cada operación. Ejemplo para categorías:
+
+```dart
+// En DatabaseHelper
+Future<int> createCategory(Category category) async {
+  final db = await database;
+  return await db.insert('categories', category.toMap());
+}
+
+Future<List<Category>> getAllCategories() async {
+  final db = await database;
+  final maps = await db.query('categories');
+  return List.generate(maps.length, (i) {
+    return Category.fromMap(maps[i]);
+  });
+}
+
+Future<int> updateCategory(Category category) async {
+  final db = await database;
+  return await db.update(
+    'categories',
+    category.toMap(),
+    where: 'id = ?',
+    whereArgs: [category.id],
+  );
+}
+
+Future<int> deleteCategory(int id) async {
+  final db = await database;
+  return await db.delete(
+    'categories',
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
+```
+
+## 5. Operaciones Complejas
+
+Ejemplo para crear una subcategoría con validación:
+
+```dart
+Future<int> createSubcategory(Subcategory subcategory) async {
+  final db = await database;
+
+  // Verificar que la categoría padre existe
+  final categoryExists = await db.query(
+    'categories',
+    where: 'id = ?',
+    whereArgs: [subcategory.categoryId],
+  );
+
+  if (categoryExists.isEmpty) {
+    throw Exception('La categoría padre no existe');
+  }
+
+  return await db.insert('subcategories', subcategory.toMap());
+}
+```
+
+## 6. Uso en la Aplicación
+
+Ejemplo de cómo usar estas operaciones en un widget:
+
+```dart
+class CategoriesScreen extends StatefulWidget {
+  @override
+  _CategoriesScreenState createState() => _CategoriesScreenState();
+}
+
+class _CategoriesScreenState extends State<CategoriesScreen> {
+  late Future<List<Category>> _categoriesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoriesFuture = DatabaseHelper.instance.getAllCategories();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Categorías')),
+      body: FutureBuilder<List<Category>>(
+        future: _categoriesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No hay categorías'));
+          } else {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                final category = snapshot.data![index];
+                return ListTile(
+                  leading: Icon(Icons.shopping_cart), // Usar iconName
+                  title: Text(category.name),
+                  subtitle: Text('Color: ${category.colorHex}'),
+                );
+              },
+            );
+          }
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: () => _addNewCategory(context),
+      ),
+    );
+  }
+
+  Future<void> _addNewCategory(BuildContext context) async {
+    // Implementar diálogo para añadir nueva categoría
+    // y llamar a DatabaseHelper.instance.createCategory()
+  }
+}
+```
+
+## 7. Consideraciones Importantes
+
+1. **Manejo de Fechas**: SQLite no tiene tipo DATE, usa TEXT y formatea con ISO8601:
+   ```dart
+   DateTime.now().toIso8601String() // Para guardar
+   DateTime.parse(stringFromDB) // Para leer
+   ```
+
+2. **Transacciones**: Para operaciones múltiples, usa transacciones:
+   ```dart
+   final db = await database;
+   await db.transaction((txn) async {
+     await txn.insert(...);
+     await txn.update(...);
+   });
+   ```
+
+3. **Migrations**: Si cambias el esquema en actualizaciones futuras:
+   ```dart
+   onUpgrade: (db, oldVersion, newVersion) async {
+     if (oldVersion < 2) {
+       await db.execute('ALTER TABLE ...');
+     }
+   }
+   ```
+
+Esta implementación cubre todos los requisitos que mencionaste:
+- Estructura jerárquica estricta (Categoría → Subcategoría → Producto)
+- Listas de compra con items marcables
+- Transacciones con diferentes niveles de detalle
+- Datos globales compartidos entre usuarios
+- Validaciones de integridad referencial
+
+
+
+
+
+
+
+
+
+Aquí están los métodos CRUD (Create, Read, Update, Delete) para cada modelo, integrados en el `DatabaseHelper`, siguiendo la estructura relacional que definimos:
+
+### **1. Métodos para `Category`** (Categorías Principales)
+```dart
+Future<int> insertCategory(Category category) async {
+  final db = await database;
+  return await db.insert('categories', category.toMap());
+}
+
+Future<List<Category>> getAllCategories() async {
+  final db = await database;
+  final maps = await db.query('categories');
+  return List.generate(maps.length, (i) => Category.fromMap(maps[i]));
+}
+
+Future<int> updateCategory(Category category) async {
+  final db = await database;
+  return await db.update(
+    'categories',
+    category.toMap(),
+    where: 'id = ?',
+    whereArgs: [category.id],
+  );
+}
+
+Future<int> deleteCategory(int id) async {
+  final db = await database;
+  return await db.delete(
+    'categories',
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
+```
+
+---
+
+### **2. Métodos para `Subcategory`** (Subcategorías)
+```dart
+Future<int> insertSubcategory(Subcategory subcategory) async {
+  final db = await database;
+  // Validar que la categoría padre exista
+  final categoryExists = await db.query(
+    'categories',
+    where: 'id = ?',
+    whereArgs: [subcategory.categoryId],
+  );
+  if (categoryExists.isEmpty) throw Exception('Categoría padre no existe');
+
+  return await db.insert('subcategories', subcategory.toMap());
+}
+
+Future<List<Subcategory>> getSubcategoriesByCategory(int categoryId) async {
+  final db = await database;
+  final maps = await db.query(
+    'subcategories',
+    where: 'category_id = ?',
+    whereArgs: [categoryId],
+  );
+  return List.generate(maps.length, (i) => Subcategory.fromMap(maps[i]));
+}
+```
+
+---
+
+### **3. Métodos para `Product`** (Productos)
+```dart
+Future<int> insertProduct(Product product) async {
+  final db = await database;
+  // Validar subcategoría
+  final subcategoryExists = await db.query(
+    'subcategories',
+    where: 'id = ?',
+    whereArgs: [product.subcategoryId],
+  );
+  if (subcategoryExists.isEmpty) throw Exception('Subcategoría no existe');
+
+  return await db.insert('products', product.toMap());
+}
+
+Future<List<Product>> getProductsBySubcategory(int subcategoryId) async {
+  final db = await database;
+  final maps = await db.query(
+    'products',
+    where: 'subcategory_id = ?',
+    whereArgs: [subcategoryId],
+  );
+  return List.generate(maps.length, (i) => Product.fromMap(maps[i]));
+}
+```
+
+---
+
+### **4. Métodos para `ShoppingList`** (Listas de Compra)
+```dart
+Future<int> insertShoppingList(ShoppingList list) async {
+  final db = await database;
+  return await db.insert('shopping_lists', list.toMap());
+}
+
+Future<List<ShoppingList>> getUserShoppingLists(String userId) async {
+  final db = await database;
+  final maps = await db.query(
+    'shopping_lists',
+    where: 'user_id = ?',
+    whereArgs: [userId],
+  );
+  return List.generate(maps.length, (i) => ShoppingList.fromMap(maps[i]));
+}
+```
+
+---
+
+### **5. Métodos para `ListItem`** (Ítems en Listas)
+```dart
+Future<int> insertListItem(ListItem item) async {
+  final db = await database;
+  // Validar lista y producto
+  final listExists = await db.query(
+    'shopping_lists',
+    where: 'id = ?',
+    whereArgs: [item.listId],
+  );
+  final productExists = await db.query(
+    'products',
+    where: 'id = ?',
+    whereArgs: [item.productId],
+  );
+  if (listExists.isEmpty || productExists.isEmpty) {
+    throw Exception('Lista o producto no existen');
+  }
+
+  return await db.insert('list_items', item.toMap());
+}
+
+Future<List<ListItem>> getItemsByList(int listId) async {
+  final db = await database;
+  final maps = await db.query(
+    'list_items',
+    where: 'list_id = ?',
+    whereArgs: [listId],
+  );
+  return List.generate(maps.length, (i) => ListItem.fromMap(maps[i]));
+}
+```
+
+---
+
+### **6. Métodos para `Transaction`** (Transacciones)
+```dart
+Future<int> insertTransaction(Transaction transaction) async {
+  final db = await database;
+  // Validar producto (si se especificó)
+  if (transaction.productId != null) {
+    final productExists = await db.query(
+      'products',
+      where: 'id = ?',
+      whereArgs: [transaction.productId],
+    );
+    if (productExists.isEmpty) throw Exception('Producto no existe');
+  }
+
+  return await db.insert('transactions', transaction.toMap());
+}
+
+Future<List<Transaction>> getUserTransactions(String userId) async {
+  final db = await database;
+  final maps = await db.query(
+    'transactions',
+    where: 'user_id = ?',
+    whereArgs: [userId],
+  );
+  return List.generate(maps.length, (i) => Transaction.fromMap(maps[i]));
+}
+```
+
+---
+
+### **7. Métodos para `MeasurementUnit`** (Unidades de Medida)
+```dart
+Future<List<MeasurementUnit>> getAllMeasurementUnits() async {
+  final db = await database;
+  final maps = await db.query('measurement_units');
+  return List.generate(maps.length, (i) => MeasurementUnit.fromMap(maps[i]));
+}
+```
+
+---
+
+### **Métodos Adicionales Útiles**
+#### **Convertir Lista a Transacciones**:
+```dart
+Future<void> convertListToTransactions(int listId, String userId) async {
+  final db = await database;
+  final items = await getItemsByList(listId);
+
+  await db.transaction((txn) async {
+    for (final item in items.where((i) => i.isChecked)) {
+      await txn.insert('transactions', {
+        'user_id': userId,
+        'product_id': item.productId,
+        'amount': 0, // Ajustar según lógica de precios
+        'quantity': item.quantity,
+        'unit_id': item.unitId,
+        'date': DateTime.now().toIso8601String(),
+      });
+    }
+  });
+}
+```
+
+#### **Obtener Jerarquía Completa de un Producto**:
+```dart
+Future<Map<String, dynamic>> getProductHierarchy(int productId) async {
+  final db = await database;
+
+  final product = await db.query(
+    'products',
+    where: 'id = ?',
+    whereArgs: [productId],
+  );
+  if (product.isEmpty) throw Exception('Producto no existe');
+
+  final subcategory = await db.query(
+    'subcategories',
+    where: 'id = ?',
+    whereArgs: [product.first['subcategory_id']],
+  );
+
+  final category = await db.query(
+    'categories',
+    where: 'id = ?',
+    whereArgs: [subcategory.first['category_id']],
+  );
+
+  return {
+    'product': Product.fromMap(product.first),
+    'subcategory': Subcategory.fromMap(subcategory.first),
+    'category': Category.fromMap(category.first),
+  };
+}
+```
+
+---
+
+### **Notas Clave**:
+1. **Validaciones**: Cada método verifica relaciones antes de insertar datos.
+2. **Transacciones**: Usar `db.transaction` para operaciones atómicas.
+3. **Errores**: Lanza excepciones descriptivas si fallan validaciones.
+4. **Eficiencia**: Consultas específicas con `whereArgs` para evitar inyección SQL.
+
+Este código cubre todas las operaciones necesarias para tu aplicación de gestión de gastos. ¿Necesitas ajustar algún método en particular?

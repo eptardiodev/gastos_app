@@ -1,6 +1,6 @@
 class DBConstants {
   static const String dbName = 'gastos_app_db';
-  static const int dbVersion = 2;
+  static const int dbVersion = 3;
 
   ///Common table schema
   static final Map<String, String> tableCols = {
@@ -30,6 +30,13 @@ class DBConstants {
   static const String authenticatedEntityTable = 'authenticated_entity_table';
   static final String profileTable = 'profile_table';
   static final String expensesTable = 'expenses_table';
+  static final String categoriesTable = 'categories';
+  static final String subcategoriesTable = 'subcategories';
+  static final String measurementUnitsTable = 'measurement_units';
+  static final String productsTable = 'products';
+  static final String shoppingListsTable = 'shopping_lists';
+  static final String listItemsTable = 'list_items';
+  static final String transactionsTable = 'transactions';
 
   ///keys for use in parent_key column
   static final String address = 'address';
