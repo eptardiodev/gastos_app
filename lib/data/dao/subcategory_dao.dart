@@ -34,4 +34,11 @@ class SubcategoryDao implements ISubcategoryDao {
     return List.generate(maps.length, (i) => SubcategoryModel.fromMap(maps[i]));
   }
 
+  @override
+  Future<List<SubcategoryModel>> getAllSubcategory() async {
+    Database db = await _appDatabase.db;
+    final maps = await db.query('subcategories');
+    return List.generate(maps.length, (i) => SubcategoryModel.fromMap(maps[i]));
+  }
+
 }

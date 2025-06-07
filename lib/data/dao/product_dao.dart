@@ -72,5 +72,15 @@ class ProductDao implements IProductDao {
     };
   }
 
+  @override
+  Future<List<ProductModel>> getAllProduct() async {
+    Database db = await _appDatabase.db;
+    final maps = await db.query('products');
+
+    return List.generate(maps.length, (i) {
+      var m = maps[i];
+      return ProductModel.fromMap(m);
+    });
+  }
 
 }

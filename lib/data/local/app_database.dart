@@ -171,6 +171,147 @@ class AppDatabase {
       'category_id': transporteId.first['id'],
       'name': 'Combustible'
     });
+
+// Get subcategory IDs
+    var panaderiaId = (await db.query('subcategories',
+        where: 'name = ?', whereArgs: ['Panadería'])).first['id'] as int;
+    var carnesId = (await db.query('subcategories',
+        where: 'name = ?', whereArgs: ['Carnes'])).first['id'] as int;
+    var combustibleId = (await db.query('subcategories',
+        where: 'name = ?', whereArgs: ['Combustible'])).first['id'] as int;
+
+    // Get unit IDs
+    var unidadId = (await db.query('measurement_units',
+        where: 'name = ?', whereArgs: ['Unidad'])).first['id'] as int;
+    var kgId = (await db.query('measurement_units',
+        where: 'name = ?', whereArgs: ['Kilogramo'])).first['id'] as int;
+    var litroId = (await db.query('measurement_units',
+        where: 'name = ?', whereArgs: ['Litro'])).first['id'] as int;
+    var paqueteId = (await db.query('measurement_units',
+        where: 'name = ?', whereArgs: ['Paquete'])).first['id'] as int;
+
+    // Insert products for Panadería subcategory
+    await db.insert('products', {
+      'subcategory_id': panaderiaId,
+      'name': 'Pan blanco',
+      'description': 'Pan de molde blanco',
+      'common_unit': 'unidad'
+    });
+    await db.insert('products', {
+      'subcategory_id': panaderiaId,
+      'name': 'Baguette',
+      'description': 'Pan francés',
+      'common_unit': 'unidad'
+    });
+    await db.insert('products', {
+      'subcategory_id': panaderiaId,
+      'name': 'Croissant',
+      'description': 'Cruasán de mantequilla',
+      'common_unit': 'unidad'
+    });
+
+    // Insert products for Carnes subcategory
+    await db.insert('products', {
+      'subcategory_id': carnesId,
+      'name': 'Pechuga de pollo',
+      'description': 'Pechuga de pollo fresca',
+      'common_unit': 'kg'
+    });
+    await db.insert('products', {
+      'subcategory_id': carnesId,
+      'name': 'Carne molida',
+      'description': 'Carne de res molida',
+      'common_unit': 'kg'
+    });
+    await db.insert('products', {
+      'subcategory_id': carnesId,
+      'name': 'Salchichas',
+      'description': 'Paquete de salchichas',
+      'common_unit': 'paquete'
+    });
+
+    // Insert products for Combustible subcategory
+    await db.insert('products', {
+      'subcategory_id': combustibleId,
+      'name': 'Gasolina 95',
+      'description': 'Gasolina sin plomo 95 octanos',
+      'common_unit': 'litro'
+    });
+    await db.insert('products', {
+      'subcategory_id': combustibleId,
+      'name': 'Diésel',
+      'description': 'Combustible diésel',
+      'common_unit': 'litro'
+    });
+
+    // Insert some sample transactions
+    await db.insert('transactions', {
+      'user_id': '12',
+      'product_id': (await db.query('products', where: 'name = ?', whereArgs: ['Pan blanco'])).first['id'],
+      'amount': 2.50,
+      'quantity': 1,
+      'unit_id': unidadId,
+      'place': 'Supermercado Central',
+      'date': DateTime.now().toIso8601String(),
+      'notes': 'Compra semanal'
+    });
+
+    await db.insert('transactions', {
+      'user_id': '12',
+      'product_id': (await db.query('products', where: 'name = ?', whereArgs: ['Pechuga de pollo'])).first['id'],
+      'amount': 8.75,
+      'quantity': 0.5,
+      'unit_id': kgId,
+      'place': 'Carnicería Don José',
+      'date': DateTime.now().subtract(Duration(days: 2)).toIso8601String(),
+      'notes': 'Para la cena'
+    });
+
+    await db.insert('transactions', {
+      'user_id': '12',
+      'product_id': (await db.query('products', where: 'name = ?', whereArgs: ['Gasolina 95'])).first['id'],
+      'amount': 45.30,
+      'quantity': 10,
+      'unit_id': litroId,
+      'place': 'Estación de servicio Shell',
+      'date': DateTime.now().subtract(Duration(days: 5)).toIso8601String(),
+      'notes': 'Llenado de tanque'
+    });
+
+    // Create a sample shopping list
+    await db.insert('shopping_lists', {
+      'user_id': '12',
+      'name': 'Lista semanal',
+      'created_at': DateTime.now().toIso8601String(),
+      'last_used': DateTime.now().toIso8601String()
+    });
+
+    var listaId = (await db.query('shopping_lists')).first['id'] as int;
+
+    // Add items to the shopping list
+    await db.insert('list_items', {
+      'list_id': listaId,
+      'product_id': (await db.query('products', where: 'name = ?', whereArgs: ['Pan blanco'])).first['id'],
+      'quantity': 2,
+      'unit_id': unidadId,
+      'added_at': DateTime.now().toIso8601String()
+    });
+
+    await db.insert('list_items', {
+      'list_id': listaId,
+      'product_id': (await db.query('products', where: 'name = ?', whereArgs: ['Carne molida'])).first['id'],
+      'quantity': 1,
+      'unit_id': kgId,
+      'added_at': DateTime.now().toIso8601String()
+    });
+
+    await db.insert('list_items', {
+      'list_id': listaId,
+      'product_id': (await db.query('products', where: 'name = ?', whereArgs: ['Salchichas'])).first['id'],
+      'quantity': 1,
+      'unit_id': paqueteId,
+      'added_at': DateTime.now().toIso8601String()
+    });
   }
 
 

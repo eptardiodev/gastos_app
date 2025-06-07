@@ -16,7 +16,7 @@ class ProductModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'subcategoryId': subcategoryId,
+      'subcategory_id': subcategoryId,
       'name': name,
       'description': description,
       'common_unit': commonUnit,
@@ -26,10 +26,10 @@ class ProductModel {
   factory ProductModel.fromMap(Map<String, dynamic> map) {
     return ProductModel(
       id: map['id'],
-      subcategoryId: map['subcategoryId'],
-      name: map['name'],
-      description: map['description'],
-      commonUnit: map['common_unit'],
+      subcategoryId: map['subcategory_id'],
+      name: map['name'] ?? '',
+      description: map['description'] ?? '',
+      commonUnit: map['common_unit'] ?? '',
     );
   }
 }

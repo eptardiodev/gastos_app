@@ -16,7 +16,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:gastos_app/base/bloc_base.dart';
 import '../../base/loading_handler.dart';
 
-class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
+class ProductListBloC extends BaseBloC with LoadingHandler, ErrorHandler {
 
   final ITransactionRepository _iTransactionRepository;
   final IExpenseRepository _iExpenseRepository;
@@ -24,13 +24,13 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
   final ISubcategoryRepository _iSubCategoryRepository;
   final IProductRepository _iProductRepository;
 
-  HomeBloC(
-    this._iTransactionRepository,
-    this._iExpenseRepository,
-    this._iCategoryRepository,
-    this._iSubCategoryRepository,
-    this._iProductRepository,
-  );
+  ProductListBloC(
+      this._iTransactionRepository,
+      this._iExpenseRepository,
+      this._iCategoryRepository,
+      this._iSubCategoryRepository,
+      this._iProductRepository,
+      );
 
   // final BehaviorSubject<List<ExpenseModel>> _expenseListSubject = BehaviorSubject();
   //
@@ -52,9 +52,16 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
 
   Stream<List<ProductModel>> get productListStream => _productListSubject.stream;
 
-  void init(){
-    getAllCategories();
-    getAllTransaction();
+  List<CategoryModel> categories = [];
+  List<SubcategoryModel> subcategories = [];
+  List<ProductModel> products = [];
+
+  Future<void> init(DateTime date) async {
+    await getAllTransactionDataByDate(date);
+    await getAllTransactionData();
+    categories = await getAllCategories();
+    subcategories = await getAllSubCategories();
+    products = await getAllProduct();
   }
 
   Future<List<CategoryModel>> getAllCategories() async {
@@ -87,9 +94,7 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
     return productList;
   }
 
-
-
-  void getAllTransaction() async {
+  Future<void> getAllTransactionData() async {
     List<AllTransactionDataModel> transactionList = [];
     final res = await _iTransactionRepository.getUserAllTransactionData("12");
     if (res is ResultSuccess<List<AllTransactionDataModel>>) {
@@ -98,32 +103,24 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
     _transactionListSubject.sink.add(transactionList);
   }
 
-  // Future<void> saveTransaction(TransactionModel transaction) async {
-  //   final res = await _iTransactionRepository.insertTransaction(transaction);
-  //   if (res is ResultSuccess<int>) {
-  //     List<TransactionModel> transactionList = _transactionListSubject.value.toList();
-  //     transactionList.add(transaction);
-  //     _transactionListSubject.sink.add(transactionList);
-  //   }
-  // }
+  Future<void> getAllTransactionDataByDate(DateTime date) async {
+    List<AllTransactionDataModel> transactionList = [];
+    final res = await _iTransactionRepository.getUserAllTransactionDataByDate("12", date);
+    if (res is ResultSuccess<List<AllTransactionDataModel>>) {
+      transactionList = res.value;
+    }
+    _transactionListSubject.sink.add(transactionList);
+  }
 
-  // void getAllExpenses() async {
-  //   List<ExpenseModel> expenseList = [];
-  //   final res = await _iExpenseRepository.getAllExpenses();
-  //   if (res is ResultSuccess<List<ExpenseModel>>) {
-  //     expenseList = res.value;
-  //   }
-  //   _expenseListSubject.sink.add(expenseList);
-  // }
+  Future<void> saveTransaction(AllTransactionDataModel transaction) async {
+    final res = await _iTransactionRepository.insertTransaction(transaction.transaction!);
+    if (res is ResultSuccess<int>) {
+      List<AllTransactionDataModel> transactionList = _transactionListSubject.value.toList();
+      transactionList.add(transaction);
+      _transactionListSubject.sink.add(transactionList);
+    }
+  }
 
-  // Future<void> saveExpense(ExpenseModel expense) async {
-  //   final res = await _iExpenseRepository.saveExpense(expense);
-  //   if (res is ResultSuccess<bool> && res.value) {
-  //     List<ExpenseModel> expenseList = _expenseListSubject.value.toList();
-  //     expenseList.add(expense);
-  //     _expenseListSubject.sink.add(expenseList);
-  //   }
-  // }
 
   @override
   void dispose() {

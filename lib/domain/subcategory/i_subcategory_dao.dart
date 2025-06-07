@@ -6,4 +6,6 @@ abstract class ISubcategoryDao {
 
   Future<List<SubcategoryModel>> getSubcategoriesByCategory(int categoryId);
 
+  Future<List<SubcategoryModel>> getAllSubcategory();
+
 }

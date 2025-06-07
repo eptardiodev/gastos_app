@@ -7,5 +7,6 @@ abstract class IProductDao {
 
   Future<Map<String, dynamic>> getProductHierarchy(int productId);
 
+  Future<List<ProductModel>> getAllProduct();
 
 }

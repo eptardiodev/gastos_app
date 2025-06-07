@@ -4,9 +4,9 @@ import 'package:rxdart/rxdart.dart';
 import 'package:gastos_app/base/bloc_base.dart';
 import '../../base/loading_handler.dart';
 
-class CreateExpenseBloc extends BaseBloC with LoadingHandler, ErrorHandler {
+class CreateTransactionBloc extends BaseBloC with LoadingHandler, ErrorHandler {
 
-  CreateExpenseBloc();
+  CreateTransactionBloc();
 
   @override
   void dispose() {

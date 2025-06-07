@@ -26,6 +26,7 @@ import 'package:gastos_app/data/repository/list_item_repository.dart';
 import 'package:gastos_app/data/repository/list_template_repository.dart';
 import 'package:gastos_app/data/repository/measurement_unit_repository.dart';
 import 'package:gastos_app/data/repository/product_repository.dart';
+import 'package:gastos_app/data/repository/product_with_category_repository.dart';
 import 'package:gastos_app/data/repository/shopping_list_repository.dart';
 import 'package:gastos_app/data/repository/subcategory_repository.dart';
 import 'package:gastos_app/data/repository/transaction_repository.dart';
@@ -49,6 +50,7 @@ import 'package:gastos_app/domain/measurement_unit_model/i_measurement_unit_repo
 import 'package:gastos_app/domain/product/i_product_converter.dart';
 import 'package:gastos_app/domain/product/i_product_dao.dart';
 import 'package:gastos_app/domain/product/i_product_repository.dart';
+import 'package:gastos_app/domain/product_with_category/i_product_with_category.dart';
 import 'package:gastos_app/domain/shopping_list/i_shopping_list_converter.dart';
 import 'package:gastos_app/domain/shopping_list/i_shopping_list_dao.dart';
 import 'package:gastos_app/domain/shopping_list/i_shopping_list_repository.dart';
@@ -61,8 +63,9 @@ import 'package:gastos_app/domain/transaction/i_transaction_repository.dart';
 import 'package:gastos_app/domain/user/i_user_converter.dart';
 import 'package:gastos_app/domain/user/i_user_dao.dart';
 import 'package:gastos_app/domain/user/i_user_repository.dart';
-import 'package:gastos_app/ui/create_expense/create_expense_bloc.dart';
+import 'package:gastos_app/ui/create_expense/create_transaction_bloc.dart';
 import 'package:gastos_app/ui/home/home_bloc.dart';
+import 'package:gastos_app/ui/product_list/product_list_bloc.dart';
 import 'package:gastos_app/ui/splash/splash_bloc.dart';
 import 'package:kiwi/kiwi.dart';
 import 'package:gastos_app/data/dao/2fa_dao.dart';
@@ -158,7 +161,7 @@ class Injector {
     container.registerSingleton<IProductDao>((c) => ProductDao(
         c.resolve()));
     container.registerSingleton<ITransactionDao>((c) => TransactionDao(
-        c.resolve()));
+        c.resolve(), c.resolve()));
     container.registerSingleton<IShoppingListDao>((c) => ShoppingListDao(
         c.resolve()));
 
@@ -173,22 +176,35 @@ class Injector {
         c.resolve(), c.resolve(), c.resolve(),));
     container.registerSingleton<IExpenseRepository>((c) => ExpenseRepository(
       c.resolve(), c.resolve(), c.resolve()));
-    container.registerSingleton<ICategoryRepository>((c) => CategoryRepository());
-    container.registerSingleton<ISubcategoryRepository>((c) => SubcategoryRepository());
-    container.registerSingleton<IListItemRepository>((c) => ListItemRepository());
-    container.registerSingleton<IListTemplateRepository>((c) => ListTemplateRepository());
-    container.registerSingleton<IMeasurementUnitRepository>((c) => MeasurementUnitRepository());
-    container.registerSingleton<IProductRepository>((c) => ProductRepository());
-    container.registerSingleton<ITransactionRepository>((c) => TransactionRepository());
-    container.registerSingleton<IShoppingListRepository>((c) => ShoppingListRepository());
+    container.registerSingleton<ICategoryRepository>((c) => CategoryRepository(
+      c.resolve(), c.resolve()));
+    container.registerSingleton<ISubcategoryRepository>((c) => SubcategoryRepository(
+      c.resolve(), c.resolve()));
+    container.registerSingleton<IListItemRepository>((c) => ListItemRepository(
+      c.resolve(), c.resolve()));
+    container.registerSingleton<IListTemplateRepository>((c) => ListTemplateRepository(
+      c.resolve(),c.resolve()));
+    container.registerSingleton<IMeasurementUnitRepository>((c) => MeasurementUnitRepository(
+      c.resolve(),c.resolve()));
+    container.registerSingleton<IProductRepository>((c) => ProductRepository(
+      c.resolve(),c.resolve()));
+    container.registerSingleton<ITransactionRepository>((c) => TransactionRepository(
+      c.resolve(),c.resolve()));
+    container.registerSingleton<IShoppingListRepository>((c) => ShoppingListRepository(
+      c.resolve(),c.resolve()));
+    container.registerSingleton<IProductWithCategoryRepository>((c) => ProductWithCategoryRepository(
+        c.resolve(),c.resolve()));
   }
 
   _registerBloCs() {
     container.registerFactory((c) => BaseAppBloC());
-    container.registerFactory((c) => HomeBloC(c.resolve()));
+    container.registerFactory((c) => HomeBloC(c.resolve(), c.resolve(), c.resolve(),
+      c.resolve(), c.resolve()));
+    container.registerFactory((c) => ProductListBloC(c.resolve(), c.resolve(), c.resolve(),
+        c.resolve(), c.resolve()));
     container.registerFactory((c) => SplashBloc(
         c.resolve(), c.resolve()));
-    container.registerFactory((c) => CreateExpenseBloc());
+    container.registerFactory((c) => CreateTransactionBloc());
   }
 
   _registerCommon() {

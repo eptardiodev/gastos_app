@@ -4,6 +4,10 @@ abstract class ITransactionDao {
 
   Future<int> insertTransaction(TransactionModel transaction);
 
-  Future<List<TransactionModel>> getUserTransactions(String userId);
+  // Future<List<TransactionModel>> getUserTransactions(String userId);
+
+  Future<List<AllTransactionDataModel>> getUserAllTransactionData(String userId);
+
+  Future<List<AllTransactionDataModel>> getUserAllTransactionDataByDate(String userId, DateTime date);
 
 }

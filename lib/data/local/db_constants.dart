@@ -1,6 +1,6 @@
 class DBConstants {
   static const String dbName = 'gastos_app_db';
-  static const int dbVersion = 3;
+  static const int dbVersion = 1;
 
   ///Common table schema
   static final Map<String, String> tableCols = {
