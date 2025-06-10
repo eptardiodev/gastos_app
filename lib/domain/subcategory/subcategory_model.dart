@@ -13,7 +13,7 @@ class SubcategoryModel {
     return {
       'id': id,
       'category_id': categoryId,
-      'name': name,
+      'name': name ?? '',
     };
   }
 
@@ -21,7 +21,7 @@ class SubcategoryModel {
     return SubcategoryModel(
       id: map['id'],
       categoryId: map['category_id'],
-      name: map['name'],
+      name: map['name'] ?? '',
     );
   }
 }

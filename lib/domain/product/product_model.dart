@@ -18,8 +18,8 @@ class ProductModel {
       'id': id,
       'subcategory_id': subcategoryId,
       'name': name,
-      'description': description,
-      'common_unit': commonUnit,
+      'description': description ?? '',
+      'common_unit': commonUnit ?? '',
     };
   }
 

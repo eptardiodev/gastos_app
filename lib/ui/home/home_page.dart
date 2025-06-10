@@ -37,11 +37,10 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
         backgroundColor: R.color.primaryColor,
         onPressed: () async {
 
-          List<TransactionModel> transactionList = [];
 
           final TransactionModel? res = await NavigationUtils.push(context,
             ProductListPage(
-              transactionList: transactionList ?? [],
+              date: DateTime(2025,6,7) ?? DateTime.now(),
           ));
           if (res != null && res.productId != null) {
           }

@@ -15,17 +15,17 @@ class CategoryModel {
     return {
       'id': id,
       'name': name,
-      'icon_name': iconName,
-      'color_hex': colorHex,
+      'icon_name': iconName ?? '',
+      'color_hex': colorHex ?? '',
     };
   }
 
   factory CategoryModel.fromMap(Map<String, dynamic> map) {
     return CategoryModel(
       id: map['id'],
-      name: map['name'],
-      iconName: map['icon_name'],
-      colorHex: map['color_hex'],
+      name: map['name'] ?? '',
+      iconName: map['icon_name'] ?? '',
+      colorHex: map['color_hex'] ?? '',
     );
   }
 }

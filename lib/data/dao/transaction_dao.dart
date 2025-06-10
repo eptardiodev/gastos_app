@@ -227,8 +227,9 @@ class TransactionDao implements ITransactionDao {
         return {
           'transaction': {
             'id': row['transaction_id'],
-            'amount': row['amount'],
-            'quantity': row['quantity'],
+            'product_id': row['product_id'],
+            'amount': row['amount'] ?? 0,
+            'quantity': row['quantity'] ?? 0,
             'place': row['place'] ?? '',
             'date': row['date'],
             'notes': row['notes'] ?? '',
@@ -236,20 +237,20 @@ class TransactionDao implements ITransactionDao {
           'product': row['product_id'] != null ? {
             'id': row['product_id'],
             'subcategory_id': row['subcategory_id'],
-            'name': row['product_name'],
-            'description': row['product_description'],
-            'common_unit': row['common_unit'],
+            'name': row['product_name'] ?? '',
+            'description': row['product_description'] ?? '',
+            'common_unit': row['common_unit'] ?? '',
           } : null,
           'subcategory': row['subcategory_id'] != null ? {
             'id': row['subcategory_id'],
             'category_id': row['category_id'],
-            'name': row['subcategory_name'],
+            'name': row['subcategory_name'] ?? '',
           } : null,
           'category': row['category_id'] != null ? {
             'id': row['category_id'],
-            'name': row['category_name'],
-            'icon': row['category_icon'],
-            'color': row['category_color'],
+            'name': row['category_name'] ?? '',
+            'icon': row['category_icon'] ?? '',
+            'color': row['category_color'] ?? '',
           } : null,
           'measurement_units': row['unit_id'] != null ? {
             'id': row['unit_id'],

@@ -46,12 +46,12 @@ class TransactionModel {
       'id': id,
       'user_id': userId,
       'product_id': productId,
-      'amount': amount,
-      'quantity': quantity,
-      'unit_id': unitId,
-      'place': place,
+      'amount': amount ?? 0,
+      'quantity': quantity ?? 0,
+      'unit_id': unitId ?? 0,
+      'place': place ?? '',
       'date': date.toIso8601String(),
-      'notes': notes,
+      'notes': notes ?? '',
     };
   }
 
@@ -60,12 +60,12 @@ class TransactionModel {
       id: map['id'],
       userId: map['user_id'] ?? "12",
       productId: map['product_id'],
-      amount: map['amount'],
-      quantity: map['quantity'],
-      unitId: map['unit_id'],
-      place: map['place'],
+      amount: map['amount'] ?? 0,
+      quantity: map['quantity'] ?? 0,
+      unitId: map['unit_id'] ?? 0,
+      place: map['place'] ?? '',
       date: DateTime.parse(map['date']),
-      notes: map['notes'],
+      notes: map['notes'] ?? '',
     );
   }
 }
@@ -99,7 +99,7 @@ class TransactionModel {
 // } : null,
 
 class AllTransactionDataModel{
-  final TransactionModel? transaction;
+  TransactionModel? transaction;
   final ProductModel? product;
   final CategoryModel? category;
   final SubcategoryModel? subcategory;
@@ -119,12 +119,12 @@ class AllTransactionDataModel{
         'id': allData.transaction!.id,
         'user_id': allData.transaction!.userId,
         'product_id': allData.transaction!.productId,
-        'amount': allData.transaction!.amount,
-        'quantity': allData.transaction!.quantity,
-        'unit_id': allData.transaction!.unitId,
-        'place': allData.transaction!.place,
+        'amount': allData.transaction!.amount ?? 0,
+        'quantity': allData.transaction!.quantity ?? 0,
+        'unit_id': allData.transaction!.unitId ?? 0,
+        'place': allData.transaction!.place ?? '',
         'date': allData.transaction!.date.toIso8601String(),
-        'notes': allData.transaction!.notes,
+        'notes': allData.transaction!.notes ?? '',
       },
       'product': {
         'id': allData.product!.id,

@@ -62,8 +62,8 @@ class AppDatabase {
     await db.execute('''
       CREATE TABLE measurement_units (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL UNIQUE,
-        symbol TEXT NOT NULL UNIQUE
+        name TEXT UNIQUE,
+        symbol TEXT UNIQUE
       )
     ''');
 
@@ -244,10 +244,12 @@ class AppDatabase {
       'common_unit': 'litro'
     });
 
+    final p1 = (await db.query('products', where: 'name = ?', whereArgs: ['Pan blanco'])).first['id'];
+
     // Insert some sample transactions
     await db.insert('transactions', {
       'user_id': '12',
-      'product_id': (await db.query('products', where: 'name = ?', whereArgs: ['Pan blanco'])).first['id'],
+      'product_id': p1,
       'amount': 2.50,
       'quantity': 1,
       'unit_id': unidadId,

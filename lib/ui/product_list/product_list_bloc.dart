@@ -58,7 +58,7 @@ class ProductListBloC extends BaseBloC with LoadingHandler, ErrorHandler {
 
   Future<void> init(DateTime date) async {
     await getAllTransactionDataByDate(date);
-    await getAllTransactionData();
+    // await getAllTransactionData();
     categories = await getAllCategories();
     subcategories = await getAllSubCategories();
     products = await getAllProduct();
@@ -112,12 +112,15 @@ class ProductListBloC extends BaseBloC with LoadingHandler, ErrorHandler {
     _transactionListSubject.sink.add(transactionList);
   }
 
-  Future<void> saveTransaction(AllTransactionDataModel transaction) async {
-    final res = await _iTransactionRepository.insertTransaction(transaction.transaction!);
+  Future<void> saveTransaction(AllTransactionDataModel allData) async {
+    List<AllTransactionDataModel> allDataList = [];
+    final res = await _iTransactionRepository.insertTransaction(allData.transaction!);
     if (res is ResultSuccess<int>) {
-      List<AllTransactionDataModel> transactionList = _transactionListSubject.value.toList();
-      transactionList.add(transaction);
-      _transactionListSubject.sink.add(transactionList);
+      final allDataRes = await _iTransactionRepository.getUserAllTransactionDataByDate("12", allData.transaction!.date);
+      if (allDataRes is ResultSuccess<List<AllTransactionDataModel>>) {
+        allDataList = allDataRes.value;
+      }
+      _transactionListSubject.sink.add(allDataList);
     }
   }
 

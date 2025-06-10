@@ -42,7 +42,7 @@ class TransactionRepository extends BaseRepository implements ITransactionReposi
       final res = await _transactionDao.getUserAllTransactionDataByDate(userId, date);
       return Result.success(value: res);
     } catch (ex) {
-      _logger.log('Error en getUserTransactions: $ex');
+      _logger.log('Error en getUserAllTransactionDataByDate: $ex');
       return Result.error(error: ex);
     }
   }
