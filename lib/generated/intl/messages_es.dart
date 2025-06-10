@@ -37,7 +37,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "expenses": MessageLookupByLibrary.simpleMessage("gastos"),
         "fieldRequired":
             MessageLookupByLibrary.simpleMessage("Campo requerido"),
+        "goodAfternoon": MessageLookupByLibrary.simpleMessage("Buenas tardes"),
+        "goodEvening": MessageLookupByLibrary.simpleMessage("Buenas noches"),
+        "goodMorning": MessageLookupByLibrary.simpleMessage("Buenos días"),
         "hello": MessageLookupByLibrary.simpleMessage("Hola"),
+        "hi": MessageLookupByLibrary.simpleMessage("Hola"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
         "operationConfirmation": MessageLookupByLibrary.simpleMessage(
