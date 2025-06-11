@@ -52,9 +52,12 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
 
   Stream<List<ProductModel>> get productListStream => _productListSubject.stream;
 
-  void init(){
+  void init({
+    required DateTime date
+  }){
     getAllCategories();
-    getAllTransaction();
+    getAllTransactionDataByDate(date);
+    // getAllTransaction();
   }
 
   Future<List<CategoryModel>> getAllCategories() async {
@@ -92,6 +95,15 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
   void getAllTransaction() async {
     List<AllTransactionDataModel> transactionList = [];
     final res = await _iTransactionRepository.getUserAllTransactionData("12");
+    if (res is ResultSuccess<List<AllTransactionDataModel>>) {
+      transactionList = res.value;
+    }
+    _transactionListSubject.sink.add(transactionList);
+  }
+
+  Future<void> getAllTransactionDataByDate(DateTime date) async {
+    List<AllTransactionDataModel> transactionList = [];
+    final res = await _iTransactionRepository.getUserAllTransactionDataByDate("12", date);
     if (res is ResultSuccess<List<AllTransactionDataModel>>) {
       transactionList = res.value;
     }

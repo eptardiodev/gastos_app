@@ -25,31 +25,31 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
-
   DateTime _focusDate = DateTime.now();
+  final EasyInfiniteDateTimelineController _controller =
+      EasyInfiniteDateTimelineController();
   @override
-  void initState(){
+  void initState() {
     super.initState();
-    bloc.init();
+    bloc.init(date: DateTime.now());
   }
-
 
   @override
   Widget buildWidget(BuildContext context) {
     String today = DateFormat('EEEE, d MMMM yyyy').format(DateTime.now());
 
     return Scaffold(
+      backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
         backgroundColor: R.color.primaryColor,
         onPressed: () async {
-
-
-          final TransactionModel? res = await NavigationUtils.push(context,
-            ProductListPage(
-              date: DateTime(2025,6,7) ?? DateTime.now(),
-          ));
-          if (res != null && res.productId != null) {
-          }
+          final TransactionModel? res = await NavigationUtils.push(
+              context,
+              ProductListPage(
+                // date: DateTime(2025, 6, 7) ?? DateTime.now(),
+                date: DateTime.now(),
+              ));
+          if (res != null && res.productId != null) {}
         },
         child: Container(
           padding: const EdgeInsets.all(5),
@@ -67,84 +67,37 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  contentPadding: EdgeInsets.all(10),
-                  title: Text("${R.string.hi} Eduardo",
-                    style: GoogleFonts.alkatra(fontSize: 35),
-                  ),
-                  subtitle: Text(today,
-                    style: GoogleFonts.alkatra(fontSize: 18),
-                  ),
-                  trailing: IconButton(
-                    onPressed: (){},
-                    icon: Icon(Icons.person,
-                      size: 50,
-                    )
-                  ),
+              ListTile(
+                contentPadding: EdgeInsets.only(top: 10, left: 10, right: 10),
+                title: Text(
+                  "${R.string.hi} Eduardo",
+                  style: GoogleFonts.alkatra(fontSize: 35),
                 ),
+                subtitle: Text(
+                  today,
+                  style: GoogleFonts.alkatra(fontSize: 18),
+                ),
+                trailing: IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.person,
+                      size: 50,
+                    )),
               ),
+
+              /// DateTime Line
+              buildEasyInfiniteDateTimeLine(),
+
+              /// Graphical weekly resume
+              Container(
+                height: 250,
+                color: Colors.grey.shade300,
+              ),
+
+              /// Today expenses
               Padding(
-                padding: EdgeInsets.all(8),
-                child: EasyInfiniteDateTimeLine(
-                  selectionMode: const SelectionMode.autoCenter(),
-        firstDate: DateTime(2024),
-        focusDate: _focusDate,
-        lastDate: DateTime(2024, 12, 31),
-        onDateChange: (selectedDate) {
-          setState(() {
-            _focusDate = selectedDate;
-          });
-        },
-        dayProps: const EasyDayProps(
-          // You must specify the width in this case.
-          width: 64.0,
-          // The height is not required in this case.
-          height: 64.0,
-        ),
-        itemBuilder: (
-            BuildContext context,
-            DateTime date,
-            bool isSelected,
-            VoidCallback onTap,
-            ) {
-          return InkResponse(
-            // You can use `InkResponse` to make your widget clickable.
-            // The `onTap` callback responsible for triggering the `onDateChange`
-            // callback and animating to the selected date if the `selectionMode` is
-            // SelectionMode.autoCenter() or SelectionMode.alwaysFirst().
-            onTap: onTap,
-            child: CircleAvatar(
-              // use `isSelected` to specify whether the widget is selected or not.
-              backgroundColor:
-              isSelected ? Colors.red : Colors.red,
-              radius: 32.0,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Flexible(
-                    child: Text(
-                      date.day.toString(),
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : null,
-                      ),
-                    ),
-                  ),
-                  Flexible(
-                    child: Text(
-                      EasyDateFormatter.shortDayName(date, "en_US"),
-                      style: TextStyle(
-                        color: isSelected ? Colors.white : null,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+                padding: EdgeInsets.only(top: 15, left: 10, right: 10),
+                child: buildTodayExpensesList(),
               )
             ],
           ),
@@ -163,16 +116,267 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
       drawer: Drawer(),
     );
   }
+
+  SingleChildScrollView buildTodayExpensesList() {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Today Expenses", style: GoogleFonts.alkatra(fontSize: 20)),
+          StreamBuilder<List<AllTransactionDataModel>>(
+              stream: bloc.transactionListStream,
+              initialData: [],
+              builder: (context, snapshot) {
+                final List<AllTransactionDataModel> allDataTodayList =
+                    snapshot.data ?? [];
+                return ListView.builder(
+                  physics: const NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  itemCount: allDataTodayList.length,
+                  itemBuilder: (context, index) {
+                    final AllTransactionDataModel data =
+                        allDataTodayList[index];
+                    final String bougthDate =
+                        DateFormat('h:mm a').format(data.transaction!.date);
+                    final String pricePerUnit = (data.transaction!.amount /
+                            (data.transaction!.quantity ?? 1))
+                        .toStringAsFixed(2);
+
+                    return Padding(
+                      padding: const EdgeInsets.all(3.0),
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border.all(
+                              width: 1.5,
+                              color: Colors.black,
+                              style: BorderStyle.solid,
+                            ),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ListTile(
+                              title: Text(
+                                data.product!.name,
+                                style: GoogleFonts.alkatra(fontSize: 17),
+                                maxLines: 3,
+                                softWrap: true,
+                                overflow: TextOverflow.clip,
+                              ),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(Icons.access_time_rounded,
+                                        size: 18,
+                                        color: R.color.greenColor,
+                                      ),
+                                      Text(
+                                        " $bougthDate ",
+                                        style: GoogleFonts.alkatra(
+                                          fontSize: 15,
+                                            color: R.color.greenColor,
+                                        ),
+                                      ),
+                                      Icon(Icons.lens,
+                                        size: 8,
+                                        color: Colors.black,
+                                      ),
+                                      Icon(Icons.attach_money,
+                                        size: 18,
+                                        color: R.color.blueColor,
+                                      ),
+                                      Text(
+                                        "$pricePerUnit/unit",
+                                        style: GoogleFonts.alkatra(
+                                          fontSize: 15,
+                                          color: R.color.blueColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    physics: AlwaysScrollableScrollPhysics(),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            top: 4,
+                                            left: 4,
+                                            bottom: 4,
+                                          ),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              border: Border.all(
+                                                width: 1.5,
+                                                color: Colors.grey.shade400,
+                                                style: BorderStyle.solid,
+                                              ),
+                                              color: Colors.grey.shade300,
+                                              borderRadius: BorderRadius.circular(10)
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(1.5),
+                                              child: Text(
+                                                data.category!.name,
+                                                style: GoogleFonts.alkatra(
+                                                  fontSize: 13,
+                                                  color: R.color.blackColor,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        Icon(Icons.keyboard_arrow_right,
+                                          color: Colors.black,
+                                          size: 18,
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                            right: 4,
+                                            top: 4,
+                                            bottom: 4
+                                          ),
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  width: 1.5,
+                                                  color: Colors.grey.shade400,
+                                                  style: BorderStyle.solid,
+                                                ),
+                                                color: Colors.grey.shade300,
+                                                borderRadius: BorderRadius.circular(10)
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(1.5),
+                                              child: Text(
+                                                data.subcategory!.name,
+                                                style: GoogleFonts.alkatra(
+                                                  fontSize: 13,
+                                                  color: R.color.blackColor,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                              horizontalTitleGap: 3,
+                              contentPadding: EdgeInsets.symmetric(horizontal: 6),
+                              trailing: Text(
+                                data.transaction!.amount.toStringAsFixed(2),
+                                style: GoogleFonts.alkatra(
+                                  fontSize: 24,
+                                  color: R.color.blackColor,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              }),
+        ],
+      ),
+    );
+  }
+
+  EasyInfiniteDateTimeLine buildEasyInfiniteDateTimeLine() {
+    return EasyInfiniteDateTimeLine(
+      controller: _controller,
+      firstDate: DateTime(2024),
+      focusDate: _focusDate,
+      lastDate: DateTime(2026),
+      selectionMode: const SelectionMode.autoCenter(),
+      headerBuilder: (context, date) {
+        String monthYear = DateFormat('MMMM yyyy').format(date);
+        return Padding(
+          padding: const EdgeInsets.only(right: 14),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
+                monthYear,
+                style: GoogleFonts.alkatra(fontSize: 18),
+              ),
+            ],
+          ),
+        );
+      },
+      onDateChange: (selectedDate) {
+        setState(() {
+          _focusDate = selectedDate;
+        });
+      },
+      dayProps: const EasyDayProps(
+        height: 80.0,
+      ),
+      itemBuilder: (
+        BuildContext context,
+        DateTime date,
+        bool isSelected,
+        VoidCallback onTap,
+      ) {
+        bool today = date.month == DateTime.now().month &&
+            date.day == DateTime.now().day &&
+            date.year == DateTime.now().year;
+        return InkResponse(
+          onTap: onTap,
+          child: Column(
+            children: [
+              Flexible(
+                child: Text(
+                  EasyDateFormatter.shortDayName(date, "en_US"),
+                  style: TextStyle(
+                    color: today ? Colors.blue : Colors.black,
+                  ),
+                ),
+              ),
+              Flexible(
+                child: CircleAvatar(
+                  // use `isSelected` to specify whether the widget is selected or not.
+                  backgroundColor:
+                      isSelected ? Colors.blue : R.color.whiteColor,
+                  radius: 23.0,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          date.day.toString(),
+                          style: TextStyle(
+                            color: isSelected ? Colors.white : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 }
 
-String getGreetings(){
+String getGreetings() {
   String greeting = '';
   int hour = DateTime.now().hour;
-  if(hour <= 12){
+  if (hour <= 12) {
     greeting = 'Good Morning';
-  } else if(hour > 12 && hour <= 6){
+  } else if (hour > 12 && hour <= 6) {
     greeting = 'Good Afternoon';
-  } else if(hour > 6){
+  } else if (hour > 6) {
     greeting = 'Good Evening';
   }
   return greeting;
