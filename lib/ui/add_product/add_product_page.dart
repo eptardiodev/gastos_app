@@ -202,7 +202,7 @@ class _AddProductPageState extends State<AddProductPage> {
                       label: 'Total',
                       controller: _amountController,
                       onChanged: (_) async {
-                        await _calculateTotal();
+                        // await _calculateTotal();
                       },
                       readOnly: true,
                     ),
