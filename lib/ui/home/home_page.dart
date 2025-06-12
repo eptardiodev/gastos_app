@@ -174,8 +174,8 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                    "Today Expenses ${allDataTodayList.isEmpty
-                      ? '' : allDataTodayList.length}",
+                    "Today Expenses (${allDataTodayList.isEmpty
+                      ? '' : allDataTodayList.length})",
                     style: GoogleFonts.alkatra(fontSize: 20)),
                 allDataTodayList.isEmpty
                     ? Text(

@@ -16,6 +16,7 @@ class TransactionModel {
 
   double amount;
   double? quantity;
+  double? price;
   String? notes;
   DateTime date;
   String? place;
@@ -35,6 +36,7 @@ class TransactionModel {
     // this.subcategoryName,
 
     this.quantity,
+    this.price,
     this.unitId,
     this.place,
     required this.date,
@@ -48,6 +50,7 @@ class TransactionModel {
       'product_id': productId,
       'amount': amount ?? 0,
       'quantity': quantity ?? 0,
+      'price': price ?? 0,
       'unit_id': unitId ?? 0,
       'place': place ?? '',
       'date': date.toIso8601String(),
@@ -62,6 +65,7 @@ class TransactionModel {
       productId: map['product_id'],
       amount: map['amount'] ?? 0,
       quantity: map['quantity'] ?? 0,
+      price: map['price'] ?? 0,
       unitId: map['unit_id'] ?? 0,
       place: map['place'] ?? '',
       date: DateTime.parse(map['date']),
@@ -121,6 +125,7 @@ class AllTransactionDataModel{
         'product_id': allData.transaction!.productId,
         'amount': allData.transaction!.amount ?? 0,
         'quantity': allData.transaction!.quantity ?? 0,
+        'price': allData.transaction!.price ?? 0,
         'unit_id': allData.transaction!.unitId ?? 0,
         'place': allData.transaction!.place ?? '',
         'date': allData.transaction!.date.toIso8601String(),

@@ -58,30 +58,13 @@ class _AddProductPageState extends State<AddProductPage> {
     super.dispose();
   }
 
-  Future<void> _calculateTotal() async {
-    if (_isCalculating) return;
-
-    _isCalculating = true;
-
+  Future<void> _calculateTotal(double price, double quantity) async {
     try {
-      final price = double.tryParse(_priceController.text.replaceAll(',', '')) ?? 0;
-      final quantity = double.tryParse(_quantityController.text.replaceAll(',', '')) ?? 0;
-      final amount = double.tryParse(_amountController.text.replaceAll(',', '')) ?? 0;
-
-      if (_priceController.text.isNotEmpty && _quantityController.text.isNotEmpty) {
-        final calculatedTotal = price * quantity;
-        _amountController.text = _formatNumber(calculatedTotal);
-      } else if (_priceController.text.isNotEmpty && _amountController.text.isNotEmpty) {
-        final calculatedQuantity = amount / price;
-        _quantityController.text = _formatNumber(calculatedQuantity);
-      } else if (_quantityController.text.isNotEmpty && _amountController.text.isNotEmpty) {
-        final calculatedPrice = amount / quantity;
-        _priceController.text = _formatNumber(calculatedPrice);
-      }
-      newTransaction.quantity = double.tryParse(_quantityController.text) ?? 0.0;
-      newTransaction.amount = double.tryParse(_amountController.text) ?? 0.0;
-    } finally {
-      _isCalculating = false;
+      final calculatedTotal = price * quantity;
+      _amountController.text = _formatNumber(calculatedTotal);
+      newTransaction.amount = calculatedTotal;
+    } catch (e){
+      print(e);
     }
   }
 
@@ -180,8 +163,11 @@ class _AddProductPageState extends State<AddProductPage> {
                     child: _buildNumberField(
                       label: 'Price',
                       controller: _priceController,
-                      onChanged: (_) async {
-                        await _calculateTotal();
+                      onChanged: (value) async {
+                        final price = double.tryParse(value.replaceAll(',', '')) ?? 0;
+                        _priceController.text = value;
+                        newTransaction.price = price;
+                        await _calculateTotal(newTransaction.price ?? 0, newTransaction.quantity ?? 0);
                       },
                     ),
                   ),
@@ -190,9 +176,11 @@ class _AddProductPageState extends State<AddProductPage> {
                     child: _buildNumberField(
                       label: 'Quantity',
                       controller: _quantityController,
-                      onChanged: (_) async {
-                        await _calculateTotal();
-
+                      onChanged: (value) async {
+                        final quantity = double.tryParse(value.replaceAll(',', '')) ?? 0;
+                        _quantityController.text = value;
+                        newTransaction.quantity = quantity;
+                        await _calculateTotal(newTransaction.price ?? 0, newTransaction.quantity ?? 0);
                       },
                     ),
                   ),
@@ -201,7 +189,10 @@ class _AddProductPageState extends State<AddProductPage> {
                     child: _buildNumberField(
                       label: 'Total',
                       controller: _amountController,
-                      onChanged: (_) async {
+                      onChanged: (value) async {
+                        if(value.isEmpty || value == "0.0"){
+                          _amountController.clear();
+                        }
                         // await _calculateTotal();
                       },
                       readOnly: true,
