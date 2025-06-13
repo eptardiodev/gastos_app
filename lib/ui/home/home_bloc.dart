@@ -12,6 +12,8 @@ import 'package:gastos_app/domain/subcategory/i_subcategory_repository.dart';
 import 'package:gastos_app/domain/subcategory/subcategory_model.dart';
 import 'package:gastos_app/domain/transaction/i_transaction_repository.dart';
 import 'package:gastos_app/domain/transaction/transaction_model.dart';
+import 'package:gastos_app/ui/home/home_page.dart';
+import 'package:gastos_app/utils/extensions.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:gastos_app/base/bloc_base.dart';
 import '../../base/loading_handler.dart';
@@ -36,6 +38,10 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
   //
   // Stream<List<ExpenseModel>> get expenseListStream => _expenseListSubject.stream;
 
+  final BehaviorSubject<List<GraphData>> _weeklySummaryListSubject = BehaviorSubject();
+
+  Stream<List<GraphData>> get weeklySummaryListStream => _weeklySummaryListSubject.stream;
+
   final BehaviorSubject<List<AllTransactionDataModel>> _transactionListSubject = BehaviorSubject();
 
   Stream<List<AllTransactionDataModel>> get transactionListStream => _transactionListSubject.stream;
@@ -57,6 +63,7 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
   }){
     getAllCategories();
     getAllTransactionDataByDate(date);
+    getAllTransactionDataByWeek(date);
     // getAllTransaction();
   }
 
@@ -108,6 +115,52 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
       transactionList = res.value;
     }
     _transactionListSubject.sink.add(transactionList);
+  }
+
+  Future<void> getAllTransactionDataByWeek(DateTime date) async {
+    List<AllTransactionDataModel> transactionList = [];
+
+    DateTime startDate = date.subtract(Duration(days: date.weekday - 1));
+    DateTime endDate = startDate.add(const Duration(days: 6));
+    List<DateTime> weekDateTimeList = [];
+    for(var i = 0; i < 7; i++){
+      DateTime day = startDate.add(Duration(days: i));
+      weekDateTimeList.add(day);
+    }
+
+    final res = await _iTransactionRepository.getUserAllTransactionDataRangeDate(
+      "12", startDate, endDate);
+    if (res is ResultSuccess<List<AllTransactionDataModel>>) {
+      transactionList = res.value;
+    }
+
+    List<GraphData> graphDataList = [];
+    List<String> weekDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+
+    for (var i = 0; i < weekDateTimeList.length; i++) {
+      DateTime currentDay = weekDateTimeList[i];
+
+      AllTransactionDataModel? transactionForDay = transactionList.firstWhere(
+            (element) => _isSameDay(element.transaction!.date, currentDay),
+        orElse: () => AllTransactionDataModel(transaction: null),
+      );
+
+      graphDataList.add(
+        GraphData(
+          weekDayLabels[i],
+          transactionForDay.transaction?.amount ?? 0.0,
+        ),
+      );
+    }
+
+    _weeklySummaryListSubject.sinkAddSafe(graphDataList);
+  }
+
+  bool _isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   // Future<void> saveTransaction(TransactionModel transaction) async {

@@ -51,6 +51,7 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
                 date: DateTime.now(),
               ));
           bloc.getAllTransactionDataByDate(DateTime.now());
+          bloc.getAllTransactionDataByWeek(DateTime.now());
         },
         child: Container(
           padding: const EdgeInsets.all(5),
@@ -90,42 +91,28 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
               buildEasyInfiniteDateTimeLine(),
 
               /// Graphical weekly resume
-              // Container(
-              //   height: 250,
-              //   color: Colors.grey.shade300,
-              // ),
-
-              Container(
-                  child: SfCartesianChart(
+              StreamBuilder<List<GraphData>>(
+                stream: bloc.weeklySummaryListStream,
+                builder: (context, snapshot) {
+                  final graphDataList = snapshot.data ?? [];
+                  return SfCartesianChart(
                       primaryXAxis: CategoryAxis(),
-                      // Chart title
                       title: ChartTitle(
                         text: 'Weekly summary',
                         alignment: ChartAlignment.near,
                         textStyle: GoogleFonts.alkatra(fontSize: 17),
                       ),
-                      // Enable legend
                       legend: Legend(
                         isVisible: false,
                       ),
-                      // Enable tooltip
                       // tooltipBehavior: _tooltipBehavior,
                       series: <LineSeries<GraphData, String>>[
                     LineSeries<GraphData, String>(
                       color: R.color.blueColor,
 
-                      dataSource: <GraphData>[
-                        GraphData('Mon', 35),
-                        GraphData('Tue', 28),
-                        GraphData('Wed', 34),
-                        GraphData('Thu', 320),
-                        GraphData('Fri', 40),
-                        GraphData('Sat', 40),
-                        GraphData('Sun', 40),
-                      ],
+                      dataSource: graphDataList,
                       xValueMapper: (GraphData sales, _) => sales.day,
                       yValueMapper: (GraphData sales, _) => sales.amountDiary,
-                      // Enable data label
                       dataLabelSettings: DataLabelSettings(
                         isVisible: true,
                       ),
@@ -137,7 +124,9 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
                         color: Colors.white,
                       ),
                     )
-                  ])),
+                  ]);
+                }
+              ),
 
               /// Today expenses
               Padding(
@@ -174,8 +163,8 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                    "Today Expenses (${allDataTodayList.isEmpty
-                      ? '' : allDataTodayList.length})",
+                    "Today Expenses ${allDataTodayList.isEmpty
+                      ? '' : "(${allDataTodayList.length})"}",
                     style: GoogleFonts.alkatra(fontSize: 20)),
                 allDataTodayList.isEmpty
                     ? Text(

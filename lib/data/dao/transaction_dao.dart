@@ -106,6 +106,7 @@ class TransactionDao implements ITransactionDao {
     return [];
   }
 
+  @override
   Future<List<AllTransactionDataModel>> getUserAllTransactionDataRangeDate(
       String userId,
       DateTime startDate,

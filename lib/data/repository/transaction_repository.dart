@@ -46,4 +46,17 @@ class TransactionRepository extends BaseRepository implements ITransactionReposi
       return Result.error(error: ex);
     }
   }
+
+  @override
+  Future<Result<List<AllTransactionDataModel>>> getUserAllTransactionDataRangeDate(
+    String userId, DateTime startDate, DateTime endDate) async {
+    try {
+      final res = await _transactionDao.getUserAllTransactionDataRangeDate(
+          userId, startDate, endDate);
+      return Result.success(value: res);
+    } catch (ex) {
+      _logger.log('Error en getUserAllTransactionDataByDate: $ex');
+      return Result.error(error: ex);
+    }
+  }
 }

@@ -6,8 +6,13 @@ abstract class ITransactionDao {
 
   // Future<List<TransactionModel>> getUserTransactions(String userId);
 
-  Future<List<AllTransactionDataModel>> getUserAllTransactionData(String userId);
+  Future<List<AllTransactionDataModel>> getUserAllTransactionData(
+      String userId);
 
-  Future<List<AllTransactionDataModel>> getUserAllTransactionDataByDate(String userId, DateTime date);
+  Future<List<AllTransactionDataModel>> getUserAllTransactionDataByDate(
+      String userId, DateTime date);
+
+  Future<List<AllTransactionDataModel>> getUserAllTransactionDataRangeDate(
+      String userId, DateTime startDate, DateTime endDate);
 
 }

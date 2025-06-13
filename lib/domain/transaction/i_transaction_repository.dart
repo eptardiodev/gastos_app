@@ -10,4 +10,7 @@ abstract class ITransactionRepository {
 
   Future<Result<List<AllTransactionDataModel>>> getUserAllTransactionDataByDate(
       String userId, DateTime date);
+
+  Future<Result<List<AllTransactionDataModel>>> getUserAllTransactionDataRangeDate(
+      String userId, DateTime startDate, DateTime endDate);
 }
