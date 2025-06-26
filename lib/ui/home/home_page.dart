@@ -41,17 +41,17 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: R.color.primaryColor,
+      floatingActionButton:
+      FloatingActionButton(
+        backgroundColor: Colors.white,
         onPressed: () async {
           await NavigationUtils.push(
               context,
               ProductListPage(
                 // date: DateTime(2025, 6, 7) ?? DateTime.now(),
-                date: DateTime.now(),
+                date: _focusDate,
               ));
-          bloc.getAllTransactionDataByDate(DateTime.now());
-          bloc.getAllTransactionDataByWeek(DateTime.now());
+          await bloc.refreshData(_focusDate);
         },
         child: Container(
           padding: const EdgeInsets.all(5),
@@ -61,13 +61,75 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
           ),
           child: Icon(
             Icons.add,
+            size: 30,
             color: R.color.primaryColor,
           ),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      bottomNavigationBar:
+      // ConvexAppBar.badge(
+      //   style: TabStyle.reactCircle,
+      //   items: <TabItem>[
+      //     TabItem(
+      //       label: "Home",
+      //       icon: Icon(Icons.home,)),
+      //     TabItem(
+      //       label: "Templates",
+      //       icon: Icon(Icons.text_snippet)),
+      //     TabItem(
+      //       label: "Products",
+      //       icon: Icon(Icons.fastfood_rounded)),
+      //     TabItem(
+      //       label: "Statistics",
+      //       icon: Icon(Icons.query_stats)),
+      //   ],
+      //   onTap: (index) {},
+      //
+      // ),
+      BottomAppBar(
+        // shape: CircularNotchedRectan,
+        color: Colors.white,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            IconButton(
+              onPressed: (){}, icon: Icon(Icons.home)),
+            IconButton(
+                onPressed: (){}, icon: Icon(Icons.text_snippet)),
+            IconButton(
+                onPressed: (){}, icon: Icon(Icons.fastfood_rounded)),
+            IconButton(
+                onPressed: (){}, icon: Icon(Icons.query_stats)),
+          ],
+        ),
+      ),
+      // BottomNavigationBar(
+      //   currentIndex: 0,
+      //   type: BottomNavigationBarType.fixed,
+      //   backgroundColor: Colors.white,
+      //   items: <BottomNavigationBarItem>[
+      //     BottomNavigationBarItem(
+      //         label: "Home",
+      //         icon: Icon(Icons.home, color: Colors.black,)),
+      //     BottomNavigationBarItem(
+      //         label: "Templates",
+      //         icon: Icon(Icons.text_snippet, color: Colors.black,)),
+      //     BottomNavigationBarItem(
+      //         label: "Products",
+      //         icon: Icon(Icons.fastfood_rounded, color: Colors.black,)),
+      //     BottomNavigationBarItem(
+      //         label: "Statistics",
+      //         icon: Icon(Icons.query_stats, color: Colors.black,)),
+      //   ],
+      //   onTap: (value){
+      //
+      //   },
+      // ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ListTile(
                 contentPadding: EdgeInsets.only(top: 10, left: 10, right: 10),
@@ -162,10 +224,21 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                    "Today Expenses ${allDataTodayList.isEmpty
-                      ? '' : "(${allDataTodayList.length})"}",
-                    style: GoogleFonts.alkatra(fontSize: 20)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                          "Today Expenses",
+                          style: GoogleFonts.alkatra(fontSize: 20)),
+                      Text(allDataTodayList.isEmpty
+                          ? ''
+                          : "Total: ${allDataTodayList.length}",
+                        style: GoogleFonts.alkatra(fontSize: 18)),
+                    ],
+                  ),
+                ),
                 allDataTodayList.isEmpty
                     ? Text(
                         "You have not made any expenses today.",
@@ -210,38 +283,41 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.access_time_rounded,
-                                              size: 18,
-                                              color: R.color.greenColor,
-                                            ),
-                                            Text(
-                                              " $bougthDate ",
-                                              style: GoogleFonts.alkatra(
-                                                fontSize: 15,
+                                        SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.access_time_rounded,
+                                                size: 18,
                                                 color: R.color.greenColor,
                                               ),
-                                            ),
-                                            Icon(
-                                              Icons.lens,
-                                              size: 8,
-                                              color: Colors.black,
-                                            ),
-                                            Icon(
-                                              Icons.attach_money,
-                                              size: 18,
-                                              color: R.color.blueColor,
-                                            ),
-                                            Text(
-                                              "$pricePerUnit/unit",
-                                              style: GoogleFonts.alkatra(
-                                                fontSize: 15,
+                                              Text(
+                                                " $bougthDate ",
+                                                style: GoogleFonts.alkatra(
+                                                  fontSize: 15,
+                                                  color: R.color.greenColor,
+                                                ),
+                                              ),
+                                              Icon(
+                                                Icons.lens,
+                                                size: 8,
+                                                color: Colors.black,
+                                              ),
+                                              Icon(
+                                                Icons.attach_money,
+                                                size: 18,
                                                 color: R.color.blueColor,
                                               ),
-                                            ),
-                                          ],
+                                              Text(
+                                                "$pricePerUnit/unit",
+                                                style: GoogleFonts.alkatra(
+                                                  fontSize: 15,
+                                                  color: R.color.blueColor,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                         SingleChildScrollView(
                                           scrollDirection: Axis.horizontal,
@@ -332,27 +408,27 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
                                         )
                                       ],
                                     ),
-                                    leading: Container(
-                                      decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.green,
-                                          border: Border.all(
-                                              color: Colors.blueGrey.shade200,
-                                              width: 2)),
-                                      child: CircleAvatar(
-                                        radius: 10,
-                                        backgroundColor:
-                                            Colors.blueGrey.shade100,
-                                        foregroundColor: Colors.black,
-                                        child: Text(
-                                          (index + 1).toString(),
-                                          style: GoogleFonts.alkatra(
-                                            fontSize: 14,
-                                            color: R.color.blackColor,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    // leading: Container(
+                                    //   decoration: BoxDecoration(
+                                    //       shape: BoxShape.circle,
+                                    //       color: Colors.green,
+                                    //       border: Border.all(
+                                    //           color: Colors.blueGrey.shade200,
+                                    //           width: 2)),
+                                    //   child: CircleAvatar(
+                                    //     radius: 10,
+                                    //     backgroundColor:
+                                    //         Colors.blueGrey.shade100,
+                                    //     foregroundColor: Colors.black,
+                                    //     child: Text(
+                                    //       (index + 1).toString(),
+                                    //       style: GoogleFonts.alkatra(
+                                    //         fontSize: 14,
+                                    //         color: R.color.blackColor,
+                                    //       ),
+                                    //     ),
+                                    //   ),
+                                    // ),
                                     horizontalTitleGap: 3,
                                     contentPadding:
                                         EdgeInsets.symmetric(horizontal: 6),
@@ -364,13 +440,16 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
                                         color: R.color.blackColor,
                                       ),
                                     ),
-                                  )
+                                  ),
                                 ],
                               ),
                             ),
                           );
                         },
-                      )
+                      ),
+                SizedBox(
+                  height: 200,
+                )
               ],
             );
           }),
@@ -399,7 +478,8 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
           ),
         );
       },
-      onDateChange: (selectedDate) {
+      onDateChange: (selectedDate) async {
+        await bloc.refreshData(selectedDate);
         setState(() {
           _focusDate = selectedDate;
         });

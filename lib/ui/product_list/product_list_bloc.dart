@@ -124,6 +124,54 @@ class ProductListBloC extends BaseBloC with LoadingHandler, ErrorHandler {
     }
   }
 
+  Future<void> updateTransaction(AllTransactionDataModel allData) async {
+    List<AllTransactionDataModel> allDataList = [];
+    final res = await _iTransactionRepository.updateTransaction(allData.transaction!);
+    if (res is ResultSuccess<int>) {
+      final allDataRes = await _iTransactionRepository.getUserAllTransactionDataByDate("12", allData.transaction!.date);
+      if (allDataRes is ResultSuccess<List<AllTransactionDataModel>>) {
+        allDataList = allDataRes.value;
+      }
+      _transactionListSubject.sink.add(allDataList);
+    }
+  }
+
+  void sortList(List<AllTransactionDataModel> allDataList) {
+    List<AllTransactionDataModel> res = [];
+    // allDataList.sort((a, b) => a.transaction!.date.isBefore(b.transaction!.date));}
+  }
+
+  void uncheckAll(){
+    List<AllTransactionDataModel> allDataList = _transactionListSubject.value;
+    allDataList.forEach((element) {
+      element.transaction!.selected = false;
+      },);
+  }
+
+  void checkAll(){
+    List<AllTransactionDataModel> allDataList = _transactionListSubject.value;
+    allDataList.forEach((element) {
+      element.transaction!.selected = true;
+    },);
+  }
+
+  Future<void> deleteTransactions(DateTime date) async {
+    List<AllTransactionDataModel> allDataList = _transactionListSubject.value;
+    List<int> transactionIdList = [];
+    allDataList.forEach((element) {
+      if((element.transaction!.selected ?? false) && element.transaction!.id != null){
+        transactionIdList.add(element.transaction!.id!);
+      }
+    },);
+    final res = await _iTransactionRepository.deleteTransactions(transactionIdList);
+    if (res is ResultSuccess<bool>) {
+      final allDataRes = await _iTransactionRepository.getUserAllTransactionDataByDate("12", date);
+      if (allDataRes is ResultSuccess<List<AllTransactionDataModel>>) {
+        allDataList = allDataRes.value;
+      }
+      _transactionListSubject.sink.add(allDataList);
+    }
+  }
 
   @override
   void dispose() {

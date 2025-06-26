@@ -13,4 +13,10 @@ abstract class ITransactionRepository {
 
   Future<Result<List<AllTransactionDataModel>>> getUserAllTransactionDataRangeDate(
       String userId, DateTime startDate, DateTime endDate);
+
+  Future<Result<int>> updateTransaction(TransactionModel transaction);
+
+  Future<Result<bool>> deleteTransaction(int transaction);
+
+  Future<Result<bool>> deleteTransactions(List<int> transactionList);
 }

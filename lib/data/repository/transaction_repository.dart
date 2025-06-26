@@ -26,6 +26,39 @@ class TransactionRepository extends BaseRepository implements ITransactionReposi
   }
 
   @override
+  Future<Result<int>> updateTransaction(TransactionModel transaction) async {
+    try {
+      final res = await _transactionDao.updateTransaction(transaction);
+      return Result.success(value: res);
+    } catch (ex) {
+      _logger.log('Error en updateTransaction: $ex');
+      return Result.error(error: ex);
+    }
+  }
+
+  @override
+  Future<Result<bool>> deleteTransaction(int transactionId) async {
+    try {
+      final res = await _transactionDao.deleteTransaction(transactionId);
+      return Result.success(value: res);
+    } catch (ex) {
+      _logger.log('Error en deleteTransaction: $ex');
+      return Result.error(error: ex);
+    }
+  }
+
+  @override
+  Future<Result<bool>> deleteTransactions(List<int> transactionIdList) async {
+    try {
+      final res = await _transactionDao.deleteTransactions(transactionIdList);
+      return Result.success(value: res);
+    } catch (ex) {
+      _logger.log('Error en deleteTransactions: $ex');
+      return Result.error(error: ex);
+    }
+  }
+
+  @override
   Future<Result<List<AllTransactionDataModel>>> getUserAllTransactionData(String userId) async {
     try {
       final res = await _transactionDao.getUserAllTransactionData(userId);

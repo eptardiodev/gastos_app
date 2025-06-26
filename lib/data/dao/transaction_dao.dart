@@ -30,6 +30,43 @@ class TransactionDao implements ITransactionDao {
   }
 
   @override
+  Future<int> updateTransaction(TransactionModel transaction) async {
+    Database db = await _appDatabase.db;
+
+    return await db.update(
+      'transactions',
+      transaction.toMap(),
+      where:'id = ?',
+      whereArgs: [transaction.id]);
+  }
+
+  @override
+  Future<bool> deleteTransaction(int transactionId) async {
+    Database db = await _appDatabase.db;
+    try{
+      await db.delete(
+          'transactions',
+          where:'id = ?',
+          whereArgs: [transactionId]);
+      return true;
+    } catch (e){
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> deleteTransactions(List<int> transactionIdList) async {
+    try{
+      await Future.wait(transactionIdList.map((e) async {
+        await deleteTransaction(e);
+      }));
+    return true;
+    } catch (e){
+      return false;
+    }
+  }
+
+  @override
   Future<List<AllTransactionDataModel>> getUserAllTransactionData(String userId) async {
     Database db = await _appDatabase.db;
 
@@ -61,7 +98,7 @@ class TransactionDao implements ITransactionDao {
     LEFT JOIN categories c ON sc.category_id = c.id
     LEFT JOIN measurement_units mu ON t.unit_id = mu.id
     WHERE t.user_id = ?
-    ORDER BY t.date DESC
+    ORDER BY t.date ASC
   ''', [userId]);
     if(results.isNotEmpty) {
       List resultList = results.map((row) {
@@ -145,7 +182,7 @@ class TransactionDao implements ITransactionDao {
     LEFT JOIN measurement_units mu ON t.unit_id = mu.id
     WHERE t.user_id = ? 
       AND t.date BETWEEN ? AND ?
-    ORDER BY t.date DESC
+    ORDER BY t.date ASC
   ''', [userId, startString, endString]);
 
     if(results.isNotEmpty) {
@@ -226,7 +263,7 @@ class TransactionDao implements ITransactionDao {
     LEFT JOIN measurement_units mu ON t.unit_id = mu.id
     WHERE t.user_id = ? 
       AND substr(t.date, 1, 10) = ?
-    ORDER BY t.date DESC
+    ORDER BY t.date ASC
   ''', [userId, dateString]);
     if(results.isNotEmpty) {
       List resultList = results.map((row) {

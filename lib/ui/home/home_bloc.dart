@@ -58,13 +58,22 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
 
   Stream<List<ProductModel>> get productListStream => _productListSubject.stream;
 
+  List<GraphData> graphDataList = [];
+
   void init({
     required DateTime date
   }){
     getAllCategories();
-    getAllTransactionDataByDate(date);
-    getAllTransactionDataByWeek(date);
+    refreshData(date);
     // getAllTransaction();
+  }
+
+  Future<bool?> refreshData(DateTime date) async {
+    ///loading true
+    await getAllTransactionDataByDate(date);
+    await getAllTransactionDataByWeek(date);
+    ///loading false
+    return true;
   }
 
   Future<List<CategoryModel>> getAllCategories() async {
@@ -119,9 +128,11 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
 
   Future<void> getAllTransactionDataByWeek(DateTime date) async {
     List<AllTransactionDataModel> transactionList = [];
+    graphDataList.clear();
 
     DateTime startDate = date.subtract(Duration(days: date.weekday - 1));
     DateTime endDate = startDate.add(const Duration(days: 6));
+
     List<DateTime> weekDateTimeList = [];
     for(var i = 0; i < 7; i++){
       DateTime day = startDate.add(Duration(days: i));
@@ -134,24 +145,27 @@ class HomeBloC extends BaseBloC with LoadingHandler, ErrorHandler {
       transactionList = res.value;
     }
 
-    List<GraphData> graphDataList = [];
     List<String> weekDayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    List<double> amountByDay   = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
 
 
+    /// Add all week amount by day
     for (var i = 0; i < weekDateTimeList.length; i++) {
       DateTime currentDay = weekDateTimeList[i];
 
-      AllTransactionDataModel? transactionForDay = transactionList.firstWhere(
-            (element) => _isSameDay(element.transaction!.date, currentDay),
-        orElse: () => AllTransactionDataModel(transaction: null),
-      );
-
-      graphDataList.add(
-        GraphData(
-          weekDayLabels[i],
-          transactionForDay.transaction?.amount ?? 0.0,
-        ),
-      );
+      /// Add total amount by day
+      for (var element in transactionList) {
+        bool isSameDay = _isSameDay(element.transaction!.date, currentDay);
+          if(isSameDay){
+            amountByDay[i] += element.transaction?.amount ?? 0.0;
+          }
+        }
+        graphDataList.add(
+          GraphData(
+            weekDayLabels[i],
+            amountByDay[i],
+          ),
+        );
     }
 
     _weeklySummaryListSubject.sinkAddSafe(graphDataList);

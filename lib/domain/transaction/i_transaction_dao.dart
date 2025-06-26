@@ -1,6 +1,8 @@
 import 'package:gastos_app/domain/transaction/transaction_model.dart';
 
-abstract class ITransactionDao {
+abstract class
+
+ITransactionDao {
 
   Future<int> insertTransaction(TransactionModel transaction);
 
@@ -15,4 +17,9 @@ abstract class ITransactionDao {
   Future<List<AllTransactionDataModel>> getUserAllTransactionDataRangeDate(
       String userId, DateTime startDate, DateTime endDate);
 
+  Future<int> updateTransaction(TransactionModel transaction);
+
+  Future<bool> deleteTransaction(int transaction);
+
+  Future<bool> deleteTransactions(List<int> transactionList);
 }

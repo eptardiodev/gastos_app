@@ -22,6 +22,8 @@ class TransactionModel {
   String? place;
   int? unitId;
 
+  bool? selected;
+
 
   TransactionModel({
     this.id,
@@ -41,6 +43,7 @@ class TransactionModel {
     this.place,
     required this.date,
     this.notes,
+    this.selected = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -108,7 +111,6 @@ class AllTransactionDataModel{
   final CategoryModel? category;
   final SubcategoryModel? subcategory;
   final MeasurementUnitModel? measurementUnitModel;
-
   AllTransactionDataModel({
     this.transaction,
     this.product,
