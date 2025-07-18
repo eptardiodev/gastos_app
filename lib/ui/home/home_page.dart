@@ -153,42 +153,7 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
               buildEasyInfiniteDateTimeLine(),
 
               /// Graphical weekly resume
-              StreamBuilder<List<GraphData>>(
-                stream: bloc.weeklySummaryListStream,
-                builder: (context, snapshot) {
-                  final graphDataList = snapshot.data ?? [];
-                  return SfCartesianChart(
-                      primaryXAxis: CategoryAxis(),
-                      title: ChartTitle(
-                        text: 'Weekly summary',
-                        alignment: ChartAlignment.near,
-                        textStyle: GoogleFonts.alkatra(fontSize: 17),
-                      ),
-                      legend: Legend(
-                        isVisible: false,
-                      ),
-                      // tooltipBehavior: _tooltipBehavior,
-                      series: <LineSeries<GraphData, String>>[
-                    LineSeries<GraphData, String>(
-                      color: R.color.blueColor,
-
-                      dataSource: graphDataList,
-                      xValueMapper: (GraphData sales, _) => sales.day,
-                      yValueMapper: (GraphData sales, _) => sales.amountDiary,
-                      dataLabelSettings: DataLabelSettings(
-                        isVisible: true,
-                      ),
-                      markerSettings: MarkerSettings(
-                        isVisible: true,
-                        shape: DataMarkerType.circle,
-                        borderWidth: 2,
-                        borderColor: R.color.blueColor,
-                        color: Colors.white,
-                      ),
-                    )
-                  ]);
-                }
-              ),
+              // buildWeeklyGraph(),
 
               /// Today expenses
               Padding(
@@ -211,6 +176,45 @@ class _HomePageState extends StateWithBloC<HomePage, HomeBloC> {
       // ),
       drawer: Drawer(),
     );
+  }
+
+  StreamBuilder<List<GraphData>> buildWeeklyGraph() {
+    return StreamBuilder<List<GraphData>>(
+              stream: bloc.weeklySummaryListStream,
+              builder: (context, snapshot) {
+                final graphDataList = snapshot.data ?? [];
+                return SfCartesianChart(
+                    primaryXAxis: CategoryAxis(),
+                    title: ChartTitle(
+                      text: 'Weekly summary',
+                      alignment: ChartAlignment.near,
+                      textStyle: GoogleFonts.alkatra(fontSize: 17),
+                    ),
+                    legend: Legend(
+                      isVisible: false,
+                    ),
+                    // tooltipBehavior: _tooltipBehavior,
+                    series: <LineSeries<GraphData, String>>[
+                  LineSeries<GraphData, String>(
+                    color: R.color.blueColor,
+
+                    dataSource: graphDataList,
+                    xValueMapper: (GraphData sales, _) => sales.day,
+                    yValueMapper: (GraphData sales, _) => sales.amountDiary,
+                    dataLabelSettings: DataLabelSettings(
+                      isVisible: true,
+                    ),
+                    markerSettings: MarkerSettings(
+                      isVisible: true,
+                      shape: DataMarkerType.circle,
+                      borderWidth: 2,
+                      borderColor: R.color.blueColor,
+                      color: Colors.white,
+                    ),
+                  )
+                ]);
+              }
+            );
   }
 
   SingleChildScrollView buildTodayExpensesList() {
